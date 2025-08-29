@@ -1,41 +1,50 @@
-import { select, Separator } from "@inquirer/prompts";
+import { AddItem } from "../../../packages/core/src/usecases/AddItem";
+import { ListItems } from "../../../packages/core/src/usecases/ListItems";
 import { InMemoryItemRepository } from "../../../packages/infrastructure/src/repositories/InMemoryItemRepository";
-import { addItem } from "../../../packages/core/src/usecases/AddItem";
+import { MainMenu } from "./prompts/select";
+import { input } from "@inquirer/prompts";
 
-const app = async () => {
-  const answer = await select({
-    message: "What do you want to do today?",
-    choices: [
-      {
-        name: "Add a container",
-        value: "add_container",
-        description: "Select this option if you want to add new container",
-      },
-      {
-        name: "List containers",
-        value: "list_containers",
-        description: "Select this option if you want to list all containers",
-      },
-      new Separator(),
-      {
-        name: "Remove a container",
-        value: "remove_container",
-        disabled: "(remove_container is not available)",
-      },
-    ],
-  });
-
+async function main() {
   const repo = new InMemoryItemRepository();
+  const addItemCommand = new AddItem(repo);
+  const listItemsCommand = new ListItems(repo);
 
-  if (answer === "add_container") {
-    await addItem(repo)({
-      id: "1",
-      name: "Box",
-      description: "A cardboard box",
-    });
+  let exit = false;
 
-    console.log(`You've added a new container: Box`);
+  // TODO: Move & organize prompts in /prompts folder
+  while (!exit) {
+    const mainMenuAction = await MainMenu();
+
+    if (mainMenuAction === "Add item") {
+      const name = await input({
+        message: "Enter item name:",
+        default: "Unnamed Item",
+        required: true,
+      });
+      const quantity = await input({
+        message: "Enter item quantity:",
+        default: "1",
+        required: true,
+      });
+      await addItemCommand.execute({
+        name,
+        quantity: Number(quantity),
+      });
+      console.log("\n\n✅ Item added successfully!\n");
+    }
+
+    if (mainMenuAction === "List items") {
+      const listItems = await listItemsCommand.execute();
+      console.log("\n\n📋 Listing all items:\n");
+      console.table(listItems);
+      console.log();
+    }
+
+    if (mainMenuAction === "Exit") {
+      exit = true;
+      console.log("👋 Goodbye! See you next time! 🚀");
+    }
   }
-};
+}
 
-app();
+main();

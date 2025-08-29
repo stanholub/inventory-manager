@@ -1,8 +1,8 @@
 import { Item } from "../entities/Item";
 
 export interface ItemRepository {
-  save(item: Item): void;
-  delete(id: string): void;
-  findById(id: string): Item | undefined;
-  list(): Item[];
+  save(item: Item): Promise<Item>;
+  delete(id: string): Promise<void>;
+  findById(id: string): Promise<Item | null>;
+  list(): Promise<Item[]>;
 }
