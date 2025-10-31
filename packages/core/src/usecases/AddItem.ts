@@ -1,13 +1,11 @@
 import { Item } from "../entities/Item";
 import { ItemRepository } from "../repositories/ItemRepository";
 
-// Input DTO
 export interface AddItemRequest {
   name: string;
   quantity: number;
 }
 
-// Output DTO
 export interface AddItemResponse {
   id: string;
   name: string;

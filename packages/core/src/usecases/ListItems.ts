@@ -1,7 +1,6 @@
 import { Item } from "../entities/Item";
 import { ItemRepository } from "../repositories/ItemRepository";
 
-// Output DTO
 export interface ListItemsResponse {
   id: string;
   name: string;

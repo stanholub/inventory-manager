@@ -1,13 +1,15 @@
 import { AddItem } from "../../../packages/core/src/usecases/AddItem";
+import { DeleteItem } from "../../../packages/core/src/usecases/DeleteItem";
 import { ListItems } from "../../../packages/core/src/usecases/ListItems";
 import { InMemoryItemRepository } from "../../../packages/infrastructure/src/repositories/InMemoryItemRepository";
-import { MainMenu } from "./prompts/select";
+import { MainMenu, SelectItemToDelete } from "./prompts/select";
 import { input } from "@inquirer/prompts";
 
 async function main() {
   const repo = new InMemoryItemRepository();
   const addItemCommand = new AddItem(repo);
   const listItemsCommand = new ListItems(repo);
+  const deleteItemCommand = new DeleteItem(repo);
 
   let exit = false;
 
@@ -38,6 +40,22 @@ async function main() {
       console.log("\n\n📋 Listing all items:\n");
       console.table(listItems);
       console.log();
+    }
+
+    if (mainMenuAction === "Delete item") {
+      const listItems = await listItemsCommand.execute();
+
+      if (listItems.length === 0) {
+        console.log("\n\n⚠️  No items available to delete!\n");
+      } else {
+        try {
+          const id = await SelectItemToDelete(listItems);
+          const { message } = await deleteItemCommand.execute({ id });
+          console.log(`\n\n✅ ${message}\n`);
+        } catch (error) {
+          console.log(`\n\n❌ Failed to delete item: ${error}\n`);
+        }
+      }
     }
 
     if (mainMenuAction === "Exit") {
