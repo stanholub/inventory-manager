@@ -4,7 +4,13 @@ import { ListItemsResponse } from "../../../../packages/core/src/usecases/ListIt
 export const MainMenu = () => {
   return select({
     message: "What do you want to do today?",
-    choices: ["Add item", "List items", "Delete item", "Exit"],
+    choices: [
+      "Add item",
+      "List items",
+      "Update item quantity",
+      "Delete item",
+      "Exit",
+    ],
   });
 };
 
@@ -15,6 +21,20 @@ export const SelectItemToDelete = (items: ListItemsResponse[]) => {
 
   return select({
     message: "Select an item to delete:",
+    choices: items.map((item) => ({
+      name: `${item.name} (Quantity: ${item.quantity}) - ID: ${item.id}`,
+      value: item.id,
+    })),
+  });
+};
+
+export const SelectItemToUpdate = (items: ListItemsResponse[]) => {
+  if (items.length === 0) {
+    throw new Error("No items available to update");
+  }
+
+  return select({
+    message: "Select an item to update:",
     choices: items.map((item) => ({
       name: `${item.name} (Quantity: ${item.quantity}) - ID: ${item.id}`,
       value: item.id,

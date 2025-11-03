@@ -1,8 +1,13 @@
 import { AddItem } from "../../../packages/core/src/usecases/AddItem";
 import { DeleteItem } from "../../../packages/core/src/usecases/DeleteItem";
 import { ListItems } from "../../../packages/core/src/usecases/ListItems";
+import { UpdateItemQty } from "../../../packages/core/src/usecases/UpdateItemQty";
 import { InMemoryItemRepository } from "../../../packages/infrastructure/src/repositories/InMemoryItemRepository";
-import { MainMenu, SelectItemToDelete } from "./prompts/select";
+import {
+  MainMenu,
+  SelectItemToDelete,
+  SelectItemToUpdate,
+} from "./prompts/select";
 import { input } from "@inquirer/prompts";
 
 async function main() {
@@ -10,6 +15,7 @@ async function main() {
   const addItemCommand = new AddItem(repo);
   const listItemsCommand = new ListItems(repo);
   const deleteItemCommand = new DeleteItem(repo);
+  const updateItemQuantityCommand = new UpdateItemQty(repo);
 
   let exit = false;
 
@@ -40,6 +46,32 @@ async function main() {
       console.log("\n\n📋 Listing all items:\n");
       console.table(listItems);
       console.log();
+    }
+
+    if (mainMenuAction === "Update item quantity") {
+      const listItems = await listItemsCommand.execute();
+
+      if (listItems.length === 0) {
+        console.log("\n\n⚠️  No items available to update!\n");
+      } else {
+        try {
+          const id = await SelectItemToUpdate(listItems);
+
+          const qty = await input({
+            message: "Enter new quantity:",
+            default: "1",
+            required: true,
+          });
+
+          const { message } = await updateItemQuantityCommand.execute({
+            id,
+            qty: Number(qty),
+          });
+          console.log(`\n\n✅ ${message}\n`);
+        } catch (error) {
+          console.log(`\n\n❌ Failed to delete item: ${error}\n`);
+        }
+      }
     }
 
     if (mainMenuAction === "Delete item") {

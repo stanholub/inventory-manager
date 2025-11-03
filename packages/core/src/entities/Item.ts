@@ -13,4 +13,8 @@ export class Item {
     if (this.quantity - qty < 0) throw new Error("Not enough stock");
     this.quantity -= qty;
   }
+
+  setQuantity(qty: number) {
+    this.quantity = qty;
+  }
 }
