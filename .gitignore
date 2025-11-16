@@ -33,3 +33,6 @@ dist-ssr
 # PWA
 sw.js
 workbox-*.js
+
+# AI KB
+AI-KB.md
