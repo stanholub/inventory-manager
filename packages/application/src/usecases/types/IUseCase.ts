@@ -1,3 +1,3 @@
-interface IUseCase {
-  execute(): Promise<any>;
+export interface IUseCase<TRequest, TResponse> {
+  execute(request: TRequest): Promise<TResponse>;
 }

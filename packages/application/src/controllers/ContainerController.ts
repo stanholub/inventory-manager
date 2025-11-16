@@ -1,13 +1,17 @@
-import { AddContainer, AddContainerResponse } from "../usecases/AddContainer";
 import {
-  ListContainers,
-  ListContainersResponse,
-} from "../usecases/ListContainers";
+  AddContainerRequest,
+  AddContainerResponse,
+} from "../usecases/AddContainer";
+import { ListContainersResponse } from "../usecases/ListContainers";
+import { IUseCase } from "../usecases/types/IUseCase";
 
 export class ContainerController {
   constructor(
-    private addContainerUseCase: AddContainer,
-    private listContainersUseCase: ListContainers
+    private addContainerUseCase: IUseCase<
+      AddContainerRequest,
+      AddContainerResponse
+    >,
+    private listContainersUseCase: IUseCase<void, ListContainersResponse[]>
   ) {}
 
   async addContainer(

@@ -1,5 +1,6 @@
 import { Container } from "../../../domain/src/entities/Container";
 import { ContainerRepository } from "../interfaces/ContainerRepository";
+import { IUseCase } from "./types/IUseCase";
 
 export interface AddContainerRequest {
   name: string;
@@ -12,7 +13,9 @@ export interface AddContainerResponse {
   name: string;
 }
 
-export class AddContainer {
+export class AddContainer
+  implements IUseCase<AddContainerRequest, AddContainerResponse>
+{
   constructor(private repo: ContainerRepository) {}
 
   async execute(request: AddContainerRequest): Promise<AddContainerResponse> {
