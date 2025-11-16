@@ -2,7 +2,8 @@ export class Item {
   constructor(
     public readonly id: string,
     public name: string,
-    public quantity: number
+    public quantity: number,
+    public containerId?: string
   ) {}
 
   increase(qty: number) {

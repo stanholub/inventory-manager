@@ -1,14 +1,19 @@
-import { select } from "@inquirer/prompts";
+import { select, Separator } from "@inquirer/prompts";
 import { ListItemsResponse } from "../../../../packages/core/src/usecases/ListItems";
 
 export const MainMenu = () => {
   return select({
     message: "What do you want to do today?",
     choices: [
+      new Separator(),
       "Add item",
       "List items",
       "Update item quantity",
       "Delete item",
+      new Separator(),
+      "Add container",
+      "List containers",
+      new Separator(),
       "Exit",
     ],
   });
