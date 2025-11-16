@@ -1,5 +1,5 @@
-import { Container } from "../../../core/src/entities/Container";
-import { ContainerRepository } from "../../../core/src/repositories/ContainerRepository";
+import { Container } from "../../../domain/src/entities/Container";
+import { ContainerRepository } from "../../../application/src/interfaces/ContainerRepository";
 
 export class InMemoryContainerRepository implements ContainerRepository {
   private containers = new Map<string, Container>();

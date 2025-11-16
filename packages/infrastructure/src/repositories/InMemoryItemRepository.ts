@@ -1,5 +1,5 @@
-import { Item } from "../../../core/src/entities/Item";
-import { ItemRepository } from "../../../core/src/repositories/ItemRepository";
+import { Item } from "../../../domain/src/entities/Item";
+import { ItemRepository } from "../../../application/src/interfaces/ItemRepository";
 
 export class InMemoryItemRepository implements ItemRepository {
   private items = new Map<string, Item>();

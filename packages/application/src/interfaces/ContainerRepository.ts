@@ -1,4 +1,4 @@
-import { Container } from "../entities/Container";
+import { Container } from "../../../domain/src/entities/Container";
 
 export interface ContainerRepository {
   add(container: Container): Promise<Container>;

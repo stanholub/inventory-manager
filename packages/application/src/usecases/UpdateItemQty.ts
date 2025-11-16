@@ -1,4 +1,4 @@
-import { ItemRepository } from "../repositories/ItemRepository";
+import { ItemRepository } from "../interfaces/ItemRepository";
 
 export interface UpdateItemQtyRequest {
   id: string;

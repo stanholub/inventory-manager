@@ -1,5 +1,5 @@
-import { Container } from "../entities/Container";
-import { ContainerRepository } from "../repositories/ContainerRepository";
+import { Container } from "../../../domain/src/entities/Container";
+import { ContainerRepository } from "../interfaces/ContainerRepository";
 
 export interface ListContainersResponse {
   id: string;

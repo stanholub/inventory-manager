@@ -1,5 +1,5 @@
-import { Item } from "../entities/Item";
-import { ItemRepository } from "../repositories/ItemRepository";
+import { Item } from "../../../domain/src/entities/Item";
+import { ItemRepository } from "../interfaces/ItemRepository";
 
 export interface ListItemsResponse {
   id: string;

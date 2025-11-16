@@ -1,14 +1,14 @@
-import { AddItem } from "../../../packages/core/src/usecases/AddItem";
-import { DeleteItem } from "../../../packages/core/src/usecases/DeleteItem";
-import { ListItems } from "../../../packages/core/src/usecases/ListItems";
-import { UpdateItemQty } from "../../../packages/core/src/usecases/UpdateItemQty";
-import { ItemController } from "../../../packages/core/src/controllers/ItemController";
-import { InMemoryItemRepository } from "../../../packages/infrastructure/src/repositories/InMemoryItemRepository";
+import { AddItem } from "../../../application/src/usecases/AddItem";
+import { DeleteItem } from "../../../application/src/usecases/DeleteItem";
+import { ListItems } from "../../../application/src/usecases/ListItems";
+import { UpdateItemQty } from "../../../application/src/usecases/UpdateItemQty";
+import { ItemController } from "../../../application/src/controllers/ItemController";
+import { InMemoryItemRepository } from "../../../infrastructure/src/repositories/InMemoryItemRepository";
 
-import { AddContainer } from "../../../packages/core/src/usecases/AddContainer";
-import { ListContainers } from "../../../packages/core/src/usecases/ListContainers";
-import { ContainerController } from "../../../packages/core/src/controllers/ContainerController";
-import { InMemoryContainerRepository } from "../../../packages/infrastructure/src/repositories/InMemoryContainerRepository";
+import { AddContainer } from "../../../application/src/usecases/AddContainer";
+import { ListContainers } from "../../../application/src/usecases/ListContainers";
+import { ContainerController } from "../../../application/src/controllers/ContainerController";
+import { InMemoryContainerRepository } from "../../../infrastructure/src/repositories/InMemoryContainerRepository";
 
 import {
   MainMenu,
