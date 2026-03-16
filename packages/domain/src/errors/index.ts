@@ -28,3 +28,9 @@ export class ValidationError extends DomainError {
     super(message);
   }
 }
+
+export class ItemTypeNotFoundError extends DomainError {
+  constructor(id: string) {
+    super(`ItemType with id "${id}" not found`);
+  }
+}

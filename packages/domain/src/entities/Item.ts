@@ -5,7 +5,8 @@ export class Item {
     public readonly id: string,
     public name: string,
     public quantity: number,
-    public containerId?: string
+    public containerId?: string,
+    public typeId?: string
   ) {}
 
   increase(qty: number) {

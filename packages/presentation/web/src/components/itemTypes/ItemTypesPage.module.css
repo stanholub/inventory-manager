@@ -1,0 +1,23 @@
+.page {
+  padding: var(--space-4);
+  padding-bottom: 80px;
+}
+
+.fab {
+  position: fixed;
+  bottom: 76px;
+  right: var(--space-4);
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 1.75rem;
+  line-height: 1;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
