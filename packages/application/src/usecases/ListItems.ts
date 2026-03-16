@@ -1,4 +1,5 @@
-import { Item } from "../../../domain/src/entities/Item";
+import { Item } from "@inventory/domain";
+import { IUseCase } from "./types/IUseCase";
 import { ItemRepository } from "../interfaces/ItemRepository";
 
 export interface ListItemsResponse {
@@ -7,7 +8,7 @@ export interface ListItemsResponse {
   quantity: number;
 }
 
-export class ListItems {
+export class ListItems implements IUseCase<void, ListItemsResponse[]> {
   constructor(private repo: ItemRepository) {}
 
   async execute(): Promise<ListItemsResponse[]> {

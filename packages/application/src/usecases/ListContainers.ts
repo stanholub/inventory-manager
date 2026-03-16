@@ -1,4 +1,5 @@
-import { Container } from "../../../domain/src/entities/Container";
+import { Container } from "@inventory/domain";
+import { IUseCase } from "./types/IUseCase";
 import { ContainerRepository } from "../interfaces/ContainerRepository";
 
 export interface ListContainersResponse {
@@ -6,7 +7,7 @@ export interface ListContainersResponse {
   name: string;
 }
 
-export class ListContainers {
+export class ListContainers implements IUseCase<void, ListContainersResponse[]> {
   constructor(private repo: ContainerRepository) {}
 
   async execute(): Promise<ListContainersResponse[]> {

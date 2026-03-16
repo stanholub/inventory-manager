@@ -1,4 +1,5 @@
-import { Item } from "../../../domain/src/entities/Item";
+import { Item } from "@inventory/domain";
+import { IUseCase } from "./types/IUseCase";
 import { ItemRepository } from "../interfaces/ItemRepository";
 
 export interface AddItemRequest {
@@ -12,13 +13,12 @@ export interface AddItemResponse {
   quantity: number;
 }
 
-export class AddItem {
+export class AddItem implements IUseCase<AddItemRequest, AddItemResponse> {
   constructor(private repo: ItemRepository) {}
 
   async execute(request: AddItemRequest): Promise<AddItemResponse> {
     const item = new Item(
-      // TODO: use crypto.randomUUID() instead
-      `${Date.now()}+${Math.random()}`,
+      crypto.randomUUID(),
       request.name,
       request.quantity
     );

@@ -1,4 +1,4 @@
-import { Item } from "../../../domain/src/entities/Item";
+import { Item } from "@inventory/domain";
 
 export interface ItemRepository {
   save(item: Item): Promise<Item>;

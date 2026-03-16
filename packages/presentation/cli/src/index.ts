@@ -1,24 +1,17 @@
-import { AddItem } from "../../../application/src/usecases/AddItem";
-import { DeleteItem } from "../../../application/src/usecases/DeleteItem";
-import { ListItems } from "../../../application/src/usecases/ListItems";
-import { UpdateItemQty } from "../../../application/src/usecases/UpdateItemQty";
-import { ItemController } from "../../../application/src/controllers/ItemController";
-import { InMemoryItemRepository } from "../../../infrastructure/src/repositories/InMemoryItemRepository";
-
-import { AddContainer } from "../../../application/src/usecases/AddContainer";
-import { ListContainers } from "../../../application/src/usecases/ListContainers";
-import { ContainerController } from "../../../application/src/controllers/ContainerController";
-import { InMemoryContainerRepository } from "../../../infrastructure/src/repositories/InMemoryContainerRepository";
-
 import {
-  MainMenu,
-  SelectItemToDelete,
-  SelectItemToUpdate,
-} from "./prompts/select";
-import { input } from "@inquirer/prompts";
+  AddItem, ListItems, UpdateItemQty, DeleteItem, ItemController,
+  AddContainer, ListContainers, ContainerController,
+} from "@inventory/core";
+import {
+  FileSystemItemRepository,
+  FileSystemContainerRepository,
+} from "@inventory/infrastructure";
+import { MainMenu } from "./prompts/select";
+import { addItemFlow, listItemsFlow, updateItemQtyFlow, deleteItemFlow } from "./flows/item";
+import { addContainerFlow, listContainersFlow } from "./flows/container";
 
 async function main() {
-  const itemRepo = new InMemoryItemRepository();
+  const itemRepo = new FileSystemItemRepository();
   const itemController = new ItemController(
     new AddItem(itemRepo),
     new ListItems(itemRepo),
@@ -26,7 +19,7 @@ async function main() {
     new DeleteItem(itemRepo)
   );
 
-  const containerRepo = new InMemoryContainerRepository();
+  const containerRepo = new FileSystemContainerRepository();
   const containerController = new ContainerController(
     new AddContainer(containerRepo),
     new ListContainers(containerRepo)
@@ -34,101 +27,18 @@ async function main() {
 
   let exit = false;
 
-  // TODO: Move & organize prompts in /prompts folder
   while (!exit) {
-    const mainMenuAction = await MainMenu();
+    const action = await MainMenu();
 
-    if (mainMenuAction === "Add item") {
-      const name = await input({
-        message: "Enter item name:",
-        default: "Unnamed Item",
-        required: true,
-      });
-      const quantity = await input({
-        message: "Enter item quantity:",
-        default: "1",
-        required: true,
-      });
-      await itemController.addItem(name, quantity); // promisssssssssse
-      console.log("\n\n✅ Item added successfully!\n");
-    }
-
-    if (mainMenuAction === "List items") {
-      const listItems = await itemController.listItems();
-      console.log("\n\n📋 Listing all items:\n");
-      console.table(listItems);
-      console.log();
-    }
-
-    if (mainMenuAction === "Update item quantity") {
-      const listItems = await itemController.listItems();
-
-      if (listItems.length === 0) {
-        console.log("\n\n⚠️  No items available to update!\n");
-      } else {
-        try {
-          const id = await SelectItemToUpdate(listItems);
-
-          const qty = await input({
-            message: "Enter new quantity:",
-            default: "1",
-            required: true,
-          });
-
-          const { message } = await itemController.updateItemQuantity(id, qty);
-          console.log(`\n\n✅ ${message}\n`);
-        } catch (error) {
-          console.log(`\n\n❌ Failed to delete item: ${error}\n`);
-        }
-      }
-    }
-
-    if (mainMenuAction === "Delete item") {
-      const listItems = await itemController.listItems();
-
-      if (listItems.length === 0) {
-        console.log("\n\n⚠️  No items available to delete!\n");
-      } else {
-        try {
-          const id = await SelectItemToDelete(listItems);
-          const { message } = await itemController.deleteItem(id);
-          console.log(`\n\n✅ ${message}\n`);
-        } catch (error) {
-          console.log(`\n\n❌ Failed to delete item: ${error}\n`);
-        }
-      }
-    }
-
-    if (mainMenuAction === "Add container") {
-      const name = await input({
-        message: "Enter container name:",
-        default: "Unnamed Container",
-        required: true,
-      });
-      const description = await input({
-        message: "Enter container description (optional):",
-      });
-      const type = await input({
-        message: "Enter container type (optional):",
-      });
-      await containerController.addContainer(
-        name,
-        description || undefined,
-        type || undefined
-      );
-      console.log("\n\n✅ Container added successfully!\n");
-    }
-
-    if (mainMenuAction === "List containers") {
-      const listContainers = await containerController.listContainers();
-      console.log("\n\n📋 Listing all containers:\n");
-      console.table(listContainers);
-      console.log();
-    }
-
-    if (mainMenuAction === "Exit") {
+    if (action === "Add item") await addItemFlow(itemController);
+    if (action === "List items") await listItemsFlow(itemController);
+    if (action === "Update item quantity") await updateItemQtyFlow(itemController);
+    if (action === "Delete item") await deleteItemFlow(itemController);
+    if (action === "Add container") await addContainerFlow(containerController);
+    if (action === "List containers") await listContainersFlow(containerController);
+    if (action === "Exit") {
       exit = true;
-      console.log("👋 Goodbye! See you next time! 🚀");
+      console.log("👋 Goodbye! See you next time!");
     }
   }
 }

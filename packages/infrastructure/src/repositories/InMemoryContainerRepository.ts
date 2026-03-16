@@ -1,8 +1,9 @@
-import { Container } from "../../../domain/src/entities/Container";
-import { ContainerRepository } from "../../../application/src/interfaces/ContainerRepository";
+import { Container } from "@inventory/domain";
+import { ContainerRepository } from "@inventory/core";
 
 export class InMemoryContainerRepository implements ContainerRepository {
   private containers = new Map<string, Container>();
+
   async add(container: Container): Promise<Container> {
     this.containers.set(container.id, container);
     return container;

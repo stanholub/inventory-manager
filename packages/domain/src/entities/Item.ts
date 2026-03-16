@@ -1,3 +1,5 @@
+import { InsufficientStockError } from "../errors/index";
+
 export class Item {
   constructor(
     public readonly id: string,
@@ -11,7 +13,7 @@ export class Item {
   }
 
   decrease(qty: number) {
-    if (this.quantity - qty < 0) throw new Error("Not enough stock");
+    if (this.quantity - qty < 0) throw new InsufficientStockError(this.quantity, qty);
     this.quantity -= qty;
   }
 

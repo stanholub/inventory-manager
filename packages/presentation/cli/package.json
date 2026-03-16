@@ -11,7 +11,8 @@
   },
   "dependencies": {
     "@inquirer/prompts": "^7.10.1",
-    "@inventory/core": "workspace:*"
+    "@inventory/core": "workspace:*",
+    "@inventory/infrastructure": "workspace:*"
   },
   "devDependencies": {
     "tsx": "^4.20.6"

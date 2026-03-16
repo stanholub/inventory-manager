@@ -1,3 +1,5 @@
+import { ItemNotFoundError } from "@inventory/domain";
+import { IUseCase } from "./types/IUseCase";
 import { ItemRepository } from "../interfaces/ItemRepository";
 
 export interface DeleteItemRequest {
@@ -8,17 +10,16 @@ export interface DeleteItemResponse {
   message: string;
 }
 
-export class DeleteItem {
+export class DeleteItem implements IUseCase<DeleteItemRequest, DeleteItemResponse> {
   constructor(private repo: ItemRepository) {}
 
   async execute(request: DeleteItemRequest): Promise<DeleteItemResponse> {
     const { id } = request;
 
-    try {
-      await this.repo.delete(id);
-      return { message: "Item deleted successfully" };
-    } catch (error) {
-      throw new Error(`Failed to delete item with id ${id}: ${error}`);
-    }
+    const item = await this.repo.findById(id);
+    if (!item) throw new ItemNotFoundError(id);
+
+    await this.repo.delete(id);
+    return { message: "Item deleted successfully" };
   }
 }

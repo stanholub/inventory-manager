@@ -1,5 +1,5 @@
 import { select, Separator } from "@inquirer/prompts";
-import { ListItemsResponse } from "../../../../application/src/usecases/ListItems";
+import { ListItemsResponse } from "@inventory/core";
 
 export const MainMenu = () => {
   return select({

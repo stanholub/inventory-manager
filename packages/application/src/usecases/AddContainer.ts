@@ -1,4 +1,4 @@
-import { Container } from "../../../domain/src/entities/Container";
+import { Container } from "@inventory/domain";
 import { ContainerRepository } from "../interfaces/ContainerRepository";
 import { IUseCase } from "./types/IUseCase";
 
@@ -20,8 +20,7 @@ export class AddContainer
 
   async execute(request: AddContainerRequest): Promise<AddContainerResponse> {
     const container = new Container(
-      // TODO: use crypto.randomUUID() instead
-      `${Date.now()}+${Math.random()}`,
+      crypto.randomUUID(),
       request.name,
       request.description,
       request.type

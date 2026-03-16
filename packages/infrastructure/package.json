@@ -1,13 +1,15 @@
 {
-  "name": "infrastructure",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "@inventory/infrastructure",
+  "version": "0.1.0",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsup src/index.ts",
+    "dev": "tsup --watch"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "dependencies": {
+    "@inventory/domain": "workspace:*",
+    "@inventory/core": "workspace:*"
+  },
   "packageManager": "pnpm@10.4.1"
 }
