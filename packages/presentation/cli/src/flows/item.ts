@@ -1,6 +1,11 @@
 import { input } from "@inquirer/prompts";
-import { ItemController } from "@inventory/core";
-import { SelectItemToDelete, SelectItemToUpdate } from "../prompts/select";
+import { ItemController, ContainerController, ItemTypeController } from "@inventory/core";
+import {
+  SelectItemToDelete,
+  SelectItemToUpdate,
+  SelectContainerForItem,
+  SelectItemTypeForItem,
+} from "../prompts/select";
 
 export async function addItemFlow(controller: ItemController) {
   const name = await input({
@@ -22,6 +27,44 @@ export async function listItemsFlow(controller: ItemController) {
   console.log("\n\n📋 Listing all items:\n");
   console.table(items);
   console.log();
+}
+
+export async function updateItemFlow(
+  controller: ItemController,
+  containerController: ContainerController,
+  itemTypeController: ItemTypeController
+) {
+  const items = await controller.listItems();
+
+  if (items.length === 0) {
+    console.log("\n\n⚠️  No items available to update!\n");
+    return;
+  }
+
+  try {
+    const id = await SelectItemToUpdate(items);
+    const current = items.find((i) => i.id === id)!;
+
+    const name = await input({
+      message: "Enter new name (leave blank to keep current):",
+      default: current.name,
+    });
+
+    const containers = await containerController.listContainers();
+    const containerId = await SelectContainerForItem(containers);
+
+    const itemTypes = await itemTypeController.listItemTypes();
+    const typeId = await SelectItemTypeForItem(itemTypes);
+
+    await controller.updateItem(id, {
+      name: name || current.name,
+      containerId: containerId === "__none__" ? null : containerId || undefined,
+      typeId: typeId === "__none__" ? null : typeId || undefined,
+    });
+    console.log("\n\n✅ Item updated successfully!\n");
+  } catch (error) {
+    console.log(`\n\n❌ Failed to update item: ${error}\n`);
+  }
 }
 
 export async function updateItemQtyFlow(controller: ItemController) {

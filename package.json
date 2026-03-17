@@ -7,6 +7,8 @@
     "build": "pnpm -r build",
     "dev": "pnpm -r dev",
     "dev:cli": "pnpm --filter @inventory/cli dev",
+    "dev:web": "pnpm --filter @inventory/web dev",
+    "build:web": "pnpm --filter @inventory/web build",
     "test": "vitest run",
     "test:watch": "vitest"
   },

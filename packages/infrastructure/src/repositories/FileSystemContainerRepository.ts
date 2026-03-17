@@ -39,6 +39,23 @@ export class FileSystemContainerRepository implements ContainerRepository {
     return container;
   }
 
+  async save(container: Container): Promise<Container> {
+    const containers = await this.readContainers();
+    const index = containers.findIndex((c) => c.id === container.id);
+    if (index !== -1) {
+      containers[index] = container;
+    } else {
+      containers.push(container);
+    }
+    await this.writeContainers(containers);
+    return container;
+  }
+
+  async delete(id: string): Promise<void> {
+    const containers = await this.readContainers();
+    await this.writeContainers(containers.filter((c) => c.id !== id));
+  }
+
   async findById(id: string): Promise<Container | null> {
     const containers = await this.readContainers();
     return containers.find((c) => c.id === id) ?? null;
