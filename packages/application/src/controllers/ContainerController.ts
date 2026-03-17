@@ -26,6 +26,12 @@ export class ContainerController {
     if (!name?.trim()) {
       throw new Error("Container name cannot be empty");
     }
+    if (name.trim().length > 255) {
+      throw new Error("Container name cannot exceed 255 characters");
+    }
+    if (description && description.length > 1000) {
+      throw new Error("Description cannot exceed 1000 characters");
+    }
 
     return await this.addContainerUseCase.execute({
       name: name.trim(),
@@ -44,6 +50,12 @@ export class ContainerController {
   ): Promise<UpdateContainerResponse> {
     if (!id?.trim()) {
       throw new Error("Container ID cannot be empty");
+    }
+    if (fields.name !== undefined && fields.name.trim().length > 255) {
+      throw new Error("Container name cannot exceed 255 characters");
+    }
+    if (fields.description && fields.description.length > 1000) {
+      throw new Error("Description cannot exceed 1000 characters");
     }
     if (!this.updateContainerUseCase) {
       throw new Error("UpdateContainer use case not configured");

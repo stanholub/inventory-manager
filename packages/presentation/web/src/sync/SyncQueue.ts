@@ -31,7 +31,11 @@ export class SyncQueue {
     const tx = db.transaction("syncQueue", "readwrite");
     const rec = await tx.store.get(id);
     if (rec) {
-      await tx.store.put({ ...rec, attempts: rec.attempts + 1 });
+      await tx.store.put({
+        ...rec,
+        attempts: rec.attempts + 1,
+        lastAttemptAt: new Date().toISOString(),
+      });
     }
     await tx.done;
   }

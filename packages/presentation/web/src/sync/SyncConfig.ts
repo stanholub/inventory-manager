@@ -7,6 +7,26 @@ const STORAGE_KEY = "inventory_sync_config";
 const DEVICE_ID_KEY = "inventory_device_id";
 const LAST_SYNCED_AT_KEY = "inventory_last_synced_at";
 
+/**
+ * Validates that the given string is a well-formed https:// Supabase URL.
+ * Returns an error message if invalid, or null if valid.
+ */
+export function validateSupabaseUrl(url: string): string | null {
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return "Invalid URL format";
+  }
+  if (parsed.protocol !== "https:") {
+    return "URL must use HTTPS";
+  }
+  if (!parsed.hostname) {
+    return "URL must have a valid hostname";
+  }
+  return null;
+}
+
 export function getSyncConfig(): SyncConfig | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);

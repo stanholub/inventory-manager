@@ -18,11 +18,31 @@ type StatusListener = (status: SyncStatus) => void;
 
 const MAX_ATTEMPTS = 5;
 
+/** Exponential backoff delay (ms) for attempt N: 2s, 4s, 8s, 16s, 32s */
+function backoffMs(attempts: number): number {
+  return Math.min(Math.pow(2, attempts) * 2000, 32000);
+}
+
+function isDueForRetry(op: { attempts: number; lastAttemptAt?: string }): boolean {
+  if (!op.lastAttemptAt) return true;
+  const elapsed = Date.now() - new Date(op.lastAttemptAt).getTime();
+  return elapsed >= backoffMs(op.attempts);
+}
+
 export class SyncService {
   private status: SyncStatus = { state: "idle" };
   private listeners: StatusListener[] = [];
   private syncInProgress = false;
   private onlineHandler: () => void;
+  private _failedOpsCount = 0;
+
+  getFailedOpsCount(): number {
+    return this._failedOpsCount;
+  }
+
+  resetFailedOps(): void {
+    this._failedOpsCount = 0;
+  }
 
   constructor(
     private config: SyncConfig,
@@ -89,8 +109,11 @@ export class SyncService {
       if (op.attempts >= MAX_ATTEMPTS) {
         // Give up on this operation after too many failures
         await this.queue.remove(op.id);
+        this._failedOpsCount++;
         continue;
       }
+      // Skip operations not yet due for retry (exponential backoff)
+      if (!isDueForRetry(op)) continue;
       try {
         if (op.operation === "upsert") {
           if (op.entityType === "items") {

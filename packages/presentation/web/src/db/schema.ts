@@ -8,6 +8,7 @@ export interface SyncQueueRecord {
   operation: "upsert" | "delete";
   createdAt: string;
   attempts: number;
+  lastAttemptAt?: string;
 }
 
 interface InventoryDB extends DBSchema {
