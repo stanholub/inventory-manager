@@ -1,4 +1,4 @@
-import { ItemType } from "@inventory/domain";
+import { ItemType, ItemTypeField } from "@inventory/domain";
 import { IUseCase } from "./types/IUseCase";
 import { ItemTypeRepository } from "../interfaces/ItemTypeRepository";
 
@@ -6,6 +6,7 @@ export interface ListItemTypesResponse {
   id: string;
   name: string;
   description?: string;
+  fields?: ItemTypeField[];
 }
 
 export class ListItemTypes implements IUseCase<void, ListItemTypesResponse[]> {
@@ -18,6 +19,7 @@ export class ListItemTypes implements IUseCase<void, ListItemTypesResponse[]> {
       id: itemType.id,
       name: itemType.name,
       description: itemType.description,
+      fields: itemType.fields,
     }));
   }
 }

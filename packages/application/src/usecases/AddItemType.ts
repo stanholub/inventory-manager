@@ -1,16 +1,18 @@
-import { ItemType } from "@inventory/domain";
+import { ItemType, ItemTypeField } from "@inventory/domain";
 import { IUseCase } from "./types/IUseCase";
 import { ItemTypeRepository } from "../interfaces/ItemTypeRepository";
 
 export interface AddItemTypeRequest {
   name: string;
   description?: string;
+  fields?: ItemTypeField[];
 }
 
 export interface AddItemTypeResponse {
   id: string;
   name: string;
   description?: string;
+  fields?: ItemTypeField[];
 }
 
 export class AddItemType implements IUseCase<AddItemTypeRequest, AddItemTypeResponse> {
@@ -20,6 +22,7 @@ export class AddItemType implements IUseCase<AddItemTypeRequest, AddItemTypeResp
     const itemType = new ItemType(
       crypto.randomUUID(),
       request.name,
+      request.fields ?? [],
       request.description
     );
 
@@ -29,6 +32,7 @@ export class AddItemType implements IUseCase<AddItemTypeRequest, AddItemTypeResp
       id: itemType.id,
       name: itemType.name,
       description: itemType.description,
+      fields: itemType.fields,
     };
   }
 }

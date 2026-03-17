@@ -7,6 +7,8 @@ export interface UpdateItemRequest {
   name?: string;
   containerId?: string | null;
   typeId?: string | null;
+  barcode?: string | null;
+  fieldValues?: Record<string, string | number | boolean>;
 }
 
 export interface UpdateItemResponse {
@@ -15,6 +17,8 @@ export interface UpdateItemResponse {
   quantity: number;
   containerId?: string;
   typeId?: string;
+  barcode?: string;
+  fieldValues?: Record<string, string | number | boolean>;
 }
 
 export class UpdateItem implements IUseCase<UpdateItemRequest, UpdateItemResponse> {
@@ -31,6 +35,9 @@ export class UpdateItem implements IUseCase<UpdateItemRequest, UpdateItemRespons
     else if (request.containerId !== undefined) item.containerId = request.containerId;
     if (request.typeId === null) item.typeId = undefined;
     else if (request.typeId !== undefined) item.typeId = request.typeId;
+    if (request.barcode === null) item.barcode = undefined;
+    else if (request.barcode !== undefined) item.barcode = request.barcode;
+    if (request.fieldValues !== undefined) item.fieldValues = request.fieldValues;
 
     await this.repo.save(item);
 
@@ -40,6 +47,8 @@ export class UpdateItem implements IUseCase<UpdateItemRequest, UpdateItemRespons
       quantity: item.quantity,
       containerId: item.containerId,
       typeId: item.typeId,
+      barcode: item.barcode,
+      fieldValues: item.fieldValues,
     };
   }
 }

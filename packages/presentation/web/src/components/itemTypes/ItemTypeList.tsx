@@ -21,6 +21,9 @@ export function ItemTypeList({ itemTypes, onEdit, onDelete }: ItemTypeListProps)
             {itemType.description && (
               <span className={styles.meta}>{itemType.description}</span>
             )}
+            {itemType.fields && itemType.fields.length > 0 && (
+              <span className={styles.meta}>{itemType.fields.length} field{itemType.fields.length !== 1 ? "s" : ""}</span>
+            )}
           </div>
           <div className={styles.actions}>
             <button className={styles.editBtn} onClick={() => onEdit(itemType)} aria-label="Edit">

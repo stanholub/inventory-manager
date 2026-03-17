@@ -34,7 +34,7 @@ export function ItemTypesPage() {
         <Modal title="Add Item Type" onClose={() => setShowForm(false)}>
           <ItemTypeForm
             onSubmit={async (data) => {
-              await addItemType(data.name, data.description);
+              await addItemType(data.name, data.description, data.fields);
               setShowForm(false);
             }}
             onCancel={() => setShowForm(false)}
@@ -45,7 +45,7 @@ export function ItemTypesPage() {
       {editing && (
         <Modal title="Edit Item Type" onClose={() => setEditing(null)}>
           <ItemTypeForm
-            initial={{ name: editing.name, description: editing.description }}
+            initial={{ name: editing.name, description: editing.description, fields: editing.fields }}
             onSubmit={async (data) => {
               await updateItemType(editing.id, data);
               setEditing(null);

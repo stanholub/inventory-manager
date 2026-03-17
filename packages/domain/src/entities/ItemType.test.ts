@@ -11,7 +11,7 @@ describe("ItemType", () => {
   });
 
   it("creates an item type with a description", () => {
-    const itemType = new ItemType("2", "Perishable", "Items with expiry dates");
+    const itemType = new ItemType("2", "Perishable", [], "Items with expiry dates");
 
     expect(itemType.description).toBe("Items with expiry dates");
   });

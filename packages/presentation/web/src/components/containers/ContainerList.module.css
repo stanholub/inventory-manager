@@ -47,6 +47,7 @@
   flex-shrink: 0;
 }
 
+.qrBtn,
 .editBtn,
 .deleteBtn {
   background: none;
@@ -59,6 +60,15 @@
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-md);
+}
+
+.qrBtn {
+  color: var(--color-primary);
+  font-size: 1.25rem;
+}
+
+.qrBtn:hover {
+  background: var(--color-hover);
 }
 
 .editBtn:hover {

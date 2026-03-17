@@ -1,0 +1,30 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.canvas {
+  border-radius: 8px;
+}
+
+.label {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary, #6b7280);
+}
+
+.printBtn {
+  padding: 8px 24px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border, #e5e7eb);
+  background: var(--color-surface, #fff);
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.printBtn:hover {
+  background: var(--color-hover, #f3f4f6);
+}

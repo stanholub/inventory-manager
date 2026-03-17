@@ -9,6 +9,7 @@ export class IdbItemTypeRepository implements ItemTypeRepository {
       id: itemType.id,
       name: itemType.name,
       description: itemType.description,
+      fields: itemType.fields,
     });
     return itemType;
   }
@@ -22,12 +23,12 @@ export class IdbItemTypeRepository implements ItemTypeRepository {
     const db = await getDb();
     const rec = await db.get("itemTypes", id);
     if (!rec) return null;
-    return new ItemType(rec.id, rec.name, rec.description);
+    return new ItemType(rec.id, rec.name, rec.fields ?? [], rec.description);
   }
 
   async list(): Promise<ItemType[]> {
     const db = await getDb();
     const recs = await db.getAll("itemTypes");
-    return recs.map((r) => new ItemType(r.id, r.name, r.description));
+    return recs.map((r) => new ItemType(r.id, r.name, r.fields ?? [], r.description));
   }
 }

@@ -15,6 +15,12 @@ const pageTitles: Record<Page, string> = {
 
 export function App() {
   const [page, setPage] = useState<Page>("items");
+  const [filterContainerId, setFilterContainerId] = useState<string | null>(null);
+
+  const handleNavigateToContainer = (containerId: string) => {
+    setFilterContainerId(containerId);
+    setPage("items");
+  };
 
   return (
     <RepositoryProvider>
@@ -29,12 +35,19 @@ export function App() {
       </header>
 
       <main style={{ flex: 1, overflowY: "auto" }}>
-        {page === "items" && <ItemsPage />}
-        {page === "containers" && <ContainersPage />}
+        {page === "items" && (
+          <ItemsPage
+            filterContainerId={filterContainerId}
+            onClearFilter={() => setFilterContainerId(null)}
+          />
+        )}
+        {page === "containers" && (
+          <ContainersPage onNavigateToContainer={handleNavigateToContainer} />
+        )}
         {page === "itemTypes" && <ItemTypesPage />}
       </main>
 
-      <BottomNav page={page} onNavigate={setPage} />
+      <BottomNav page={page} onNavigate={(p) => { setPage(p); if (p !== "items") setFilterContainerId(null); }} />
     </RepositoryProvider>
   );
 }

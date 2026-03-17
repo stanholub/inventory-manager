@@ -5,9 +5,10 @@ interface ContainerListProps {
   containers: ListContainersResponse[];
   onEdit: (container: ListContainersResponse) => void;
   onDelete: (id: string) => void;
+  onShowQR: (container: ListContainersResponse) => void;
 }
 
-export function ContainerList({ containers, onEdit, onDelete }: ContainerListProps) {
+export function ContainerList({ containers, onEdit, onDelete, onShowQR }: ContainerListProps) {
   if (containers.length === 0) {
     return <p className={styles.empty}>No containers yet. Tap + to add one.</p>;
   }
@@ -26,6 +27,9 @@ export function ContainerList({ containers, onEdit, onDelete }: ContainerListPro
             )}
           </div>
           <div className={styles.actions}>
+            <button className={styles.qrBtn} onClick={() => onShowQR(container)} aria-label="Show QR code" title="Show QR code">
+              ▦
+            </button>
             <button className={styles.editBtn} onClick={() => onEdit(container)} aria-label="Edit">
               ✏️
             </button>

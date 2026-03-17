@@ -6,7 +6,9 @@ export class Item {
     public name: string,
     public quantity: number,
     public containerId?: string,
-    public typeId?: string
+    public typeId?: string,
+    public barcode?: string,
+    public fieldValues: Record<string, string | number | boolean> = {}
   ) {}
 
   increase(qty: number) {
