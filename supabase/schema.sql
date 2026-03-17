@@ -1,6 +1,30 @@
 -- Inventory Manager – Supabase Schema
--- Run this in your Supabase project SQL Editor (Database → SQL Editor → New query).
--- This creates the three tables required for cloud sync.
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Full setup guide: supabase/README.md
+--
+-- Quick start:
+--   1. Open SQL Editor in your Supabase dashboard (Database → SQL Editor)
+--   2. Paste this entire file and click Run
+--   3. Copy your Project URL + anon key from Settings → API
+--   4. Open the app → Settings tab → paste credentials → Enable sync
+-- ─────────────────────────────────────────────────────────────────────────────
+--
+-- Tables created:
+--   items        – inventory items with quantity tracking
+--   containers   – storage locations / bins that items can belong to
+--   item_types   – categories with custom field definitions
+--
+-- Sync columns (present on all three tables):
+--   updated_at   – ISO timestamp of last write; used for last-write-wins merge
+--   device_id    – UUID of the device that wrote this row (for attribution)
+--   deleted_at   – tombstone timestamp; NULL means the record is active
+--
+-- JSON columns:
+--   items.field_values   – arbitrary key/value pairs matching the item's type
+--                          fields schema, e.g. {"color": "red", "weight": 1.5}
+--   item_types.fields    – array of ItemTypeField objects that define the
+--                          custom fields for this type, e.g.
+--                          [{"id":"f1","name":"Color","type":"text","required":true}]
 
 create table if not exists items (
   id          text        primary key,
