@@ -28,15 +28,40 @@ export function useItems(itemRepo: ItemRepository) {
   }, [itemRepo]);
 
   const addItem = useCallback(
-    async (name: string, quantity: number) => {
-      await new AddItem(itemRepo).execute({ name, quantity });
+    async (
+      name: string,
+      quantity: number,
+      opts?: {
+        containerId?: string | null;
+        typeId?: string | null;
+        barcode?: string | null;
+        fieldValues?: Record<string, string | number | boolean>;
+      }
+    ) => {
+      await new AddItem(itemRepo).execute({
+        name,
+        quantity,
+        containerId: opts?.containerId ?? undefined,
+        typeId: opts?.typeId ?? undefined,
+        barcode: opts?.barcode ?? undefined,
+        fieldValues: opts?.fieldValues,
+      });
       await refresh();
     },
     [itemRepo, refresh]
   );
 
   const updateItem = useCallback(
-    async (id: string, fields: { name?: string; containerId?: string | null; typeId?: string | null }) => {
+    async (
+      id: string,
+      fields: {
+        name?: string;
+        containerId?: string | null;
+        typeId?: string | null;
+        barcode?: string | null;
+        fieldValues?: Record<string, string | number | boolean>;
+      }
+    ) => {
       await new UpdateItem(itemRepo).execute({ id, ...fields });
       await refresh();
     },

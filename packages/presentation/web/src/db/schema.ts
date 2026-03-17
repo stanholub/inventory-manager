@@ -1,4 +1,5 @@
 import { openDB, DBSchema, IDBPDatabase } from "idb";
+import { ItemTypeField } from "@inventory/domain";
 
 interface InventoryDB extends DBSchema {
   items: {
@@ -9,6 +10,8 @@ interface InventoryDB extends DBSchema {
       quantity: number;
       containerId?: string;
       typeId?: string;
+      barcode?: string;
+      fieldValues?: Record<string, string | number | boolean>;
     };
   };
   containers: {
@@ -26,6 +29,7 @@ interface InventoryDB extends DBSchema {
       id: string;
       name: string;
       description?: string;
+      fields?: ItemTypeField[];
     };
   };
 }

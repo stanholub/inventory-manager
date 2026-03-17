@@ -7,6 +7,7 @@ import {
   DeleteItemType,
   ListItemTypesResponse,
 } from "@inventory/core";
+import { ItemTypeField } from "@inventory/domain";
 
 export function useItemTypes(itemTypeRepo: ItemTypeRepository) {
   const [itemTypes, setItemTypes] = useState<ListItemTypesResponse[]>([]);
@@ -27,16 +28,16 @@ export function useItemTypes(itemTypeRepo: ItemTypeRepository) {
   }, [itemTypeRepo]);
 
   const addItemType = useCallback(
-    async (name: string, description?: string) => {
-      await new AddItemType(itemTypeRepo).execute({ name, description });
+    async (name: string, description?: string, fields?: ItemTypeField[]) => {
+      await new AddItemType(itemTypeRepo).execute({ name, description, fields });
       await refresh();
     },
     [itemTypeRepo, refresh]
   );
 
   const updateItemType = useCallback(
-    async (id: string, fields: { name?: string; description?: string | null }) => {
-      await new UpdateItemType(itemTypeRepo).execute({ id, ...fields });
+    async (id: string, data: { name?: string; description?: string | null; fields?: ItemTypeField[] }) => {
+      await new UpdateItemType(itemTypeRepo).execute({ id, ...data });
       await refresh();
     },
     [itemTypeRepo, refresh]

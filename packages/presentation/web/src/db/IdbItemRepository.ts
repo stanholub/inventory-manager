@@ -11,6 +11,8 @@ export class IdbItemRepository implements ItemRepository {
       quantity: item.quantity,
       containerId: item.containerId,
       typeId: item.typeId,
+      barcode: item.barcode,
+      fieldValues: item.fieldValues,
     });
     return item;
   }
@@ -24,12 +26,12 @@ export class IdbItemRepository implements ItemRepository {
     const db = await getDb();
     const rec = await db.get("items", id);
     if (!rec) return null;
-    return new Item(rec.id, rec.name, rec.quantity, rec.containerId, rec.typeId);
+    return new Item(rec.id, rec.name, rec.quantity, rec.containerId, rec.typeId, rec.barcode, rec.fieldValues ?? {});
   }
 
   async list(): Promise<Item[]> {
     const db = await getDb();
     const recs = await db.getAll("items");
-    return recs.map((r) => new Item(r.id, r.name, r.quantity, r.containerId, r.typeId));
+    return recs.map((r) => new Item(r.id, r.name, r.quantity, r.containerId, r.typeId, r.barcode, r.fieldValues ?? {}));
   }
 }

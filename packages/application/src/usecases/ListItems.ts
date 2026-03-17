@@ -8,6 +8,8 @@ export interface ListItemsResponse {
   quantity: number;
   containerId?: string;
   typeId?: string;
+  barcode?: string;
+  fieldValues?: Record<string, string | number | boolean>;
 }
 
 export class ListItems implements IUseCase<void, ListItemsResponse[]> {
@@ -22,6 +24,8 @@ export class ListItems implements IUseCase<void, ListItemsResponse[]> {
       quantity: item.quantity,
       containerId: item.containerId,
       typeId: item.typeId,
+      barcode: item.barcode,
+      fieldValues: item.fieldValues,
     }));
   }
 }
