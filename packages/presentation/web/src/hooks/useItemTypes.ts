@@ -9,7 +9,7 @@ import {
 } from "@inventory/core";
 import { ItemTypeField } from "@inventory/domain";
 
-export function useItemTypes(itemTypeRepo: ItemTypeRepository) {
+export function useItemTypes(itemTypeRepo: ItemTypeRepository, refreshKey?: number) {
   const [itemTypes, setItemTypes] = useState<ListItemTypesResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -53,7 +53,7 @@ export function useItemTypes(itemTypeRepo: ItemTypeRepository) {
 
   useEffect(() => {
     refresh();
-  }, [refresh]);
+  }, [refresh, refreshKey]);
 
   return { itemTypes, loading, error, refresh, addItemType, updateItemType, deleteItemType };
 }

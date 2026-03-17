@@ -8,7 +8,7 @@ import {
   ListContainersResponse,
 } from "@inventory/core";
 
-export function useContainers(containerRepo: ContainerRepository) {
+export function useContainers(containerRepo: ContainerRepository, refreshKey?: number) {
   const [containers, setContainers] = useState<ListContainersResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -52,7 +52,7 @@ export function useContainers(containerRepo: ContainerRepository) {
 
   useEffect(() => {
     refresh();
-  }, [refresh]);
+  }, [refresh, refreshKey]);
 
   return { containers, loading, error, refresh, addContainer, updateContainer, deleteContainer };
 }

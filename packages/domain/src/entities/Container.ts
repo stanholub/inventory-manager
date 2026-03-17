@@ -3,6 +3,14 @@ export class Container {
     public readonly id: string,
     public name: string,
     public description?: string,
-    public type?: string
+    public type?: string,
+    public updatedAt: string = new Date().toISOString(),
+    public deviceId?: string,
+    public deletedAt?: string
   ) {}
+
+  touch(deviceId: string) {
+    this.updatedAt = new Date().toISOString();
+    this.deviceId = deviceId;
+  }
 }

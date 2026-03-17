@@ -2,6 +2,8 @@ import { Container } from "@inventory/domain";
 import { ContainerRepository } from "@inventory/core";
 import { getDb } from "./schema";
 
+const FALLBACK_TS = new Date(0).toISOString();
+
 export class IdbContainerRepository implements ContainerRepository {
   async add(container: Container): Promise<Container> {
     return this.save(container);
@@ -14,6 +16,9 @@ export class IdbContainerRepository implements ContainerRepository {
       name: container.name,
       description: container.description,
       type: container.type,
+      updatedAt: container.updatedAt ?? FALLBACK_TS,
+      deviceId: container.deviceId,
+      deletedAt: container.deletedAt,
     });
     return container;
   }
@@ -27,12 +32,33 @@ export class IdbContainerRepository implements ContainerRepository {
     const db = await getDb();
     const rec = await db.get("containers", id);
     if (!rec) return null;
-    return new Container(rec.id, rec.name, rec.description, rec.type);
+    return new Container(
+      rec.id,
+      rec.name,
+      rec.description,
+      rec.type,
+      rec.updatedAt ?? FALLBACK_TS,
+      rec.deviceId,
+      rec.deletedAt
+    );
   }
 
   async findAll(): Promise<Container[]> {
     const db = await getDb();
     const recs = await db.getAll("containers");
-    return recs.map((r) => new Container(r.id, r.name, r.description, r.type));
+    return recs
+      .filter((r) => !r.deletedAt)
+      .map(
+        (r) =>
+          new Container(
+            r.id,
+            r.name,
+            r.description,
+            r.type,
+            r.updatedAt ?? FALLBACK_TS,
+            r.deviceId,
+            r.deletedAt
+          )
+      );
   }
 }
