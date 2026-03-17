@@ -1,18 +1,16 @@
 import { useState } from "react";
 import { RepositoryProvider } from "./context/RepositoryContext";
-import { ItemsPage } from "./components/items/ItemsPage";
-import { ContainersPage } from "./components/containers/ContainersPage";
+import { InventoryPage } from "./components/inventory/InventoryPage";
 import { ItemTypesPage } from "./components/itemTypes/ItemTypesPage";
 import { SettingsPage } from "./components/settings/SettingsPage";
 import { BottomNav } from "./components/layout/BottomNav";
 import { SyncStatusIndicator } from "./components/layout/SyncStatusIndicator";
 import { useInstallPrompt } from "./hooks/useInstallPrompt";
 
-type Page = "items" | "containers" | "itemTypes" | "settings";
+type Page = "inventory" | "itemTypes" | "settings";
 
 const pageTitles: Record<Page, string> = {
-  items: "Items",
-  containers: "Containers",
+  inventory: "Inventory",
   itemTypes: "Item Types",
   settings: "Settings",
 };
@@ -53,13 +51,7 @@ function InstallBanner() {
 }
 
 export function App() {
-  const [page, setPage] = useState<Page>("items");
-  const [filterContainerId, setFilterContainerId] = useState<string | null>(null);
-
-  const handleNavigateToContainer = (containerId: string) => {
-    setFilterContainerId(containerId);
-    setPage("items");
-  };
+  const [page, setPage] = useState<Page>("inventory");
 
   return (
     <RepositoryProvider>
@@ -79,20 +71,12 @@ export function App() {
       <InstallBanner />
 
       <main style={{ flex: 1, overflowY: "auto" }}>
-        {page === "items" && (
-          <ItemsPage
-            filterContainerId={filterContainerId}
-            onClearFilter={() => setFilterContainerId(null)}
-          />
-        )}
-        {page === "containers" && (
-          <ContainersPage onNavigateToContainer={handleNavigateToContainer} />
-        )}
+        {page === "inventory" && <InventoryPage />}
         {page === "itemTypes" && <ItemTypesPage />}
         {page === "settings" && <SettingsPage />}
       </main>
 
-      <BottomNav page={page} onNavigate={(p) => { setPage(p); if (p !== "items") setFilterContainerId(null); }} />
+      <BottomNav page={page} onNavigate={setPage} />
     </RepositoryProvider>
   );
 }

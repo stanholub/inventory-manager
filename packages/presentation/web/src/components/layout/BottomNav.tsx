@@ -1,6 +1,6 @@
 import styles from "./BottomNav.module.css";
 
-type Page = "items" | "containers" | "itemTypes" | "settings";
+type Page = "inventory" | "itemTypes" | "settings";
 
 interface BottomNavProps {
   page: Page;
@@ -8,8 +8,7 @@ interface BottomNavProps {
 }
 
 const tabs: { id: Page; label: string; icon: string }[] = [
-  { id: "items", label: "Items", icon: "📦" },
-  { id: "containers", label: "Containers", icon: "🗂️" },
+  { id: "inventory", label: "Inventory", icon: "🏠" },
   { id: "itemTypes", label: "Types", icon: "🏷️" },
   { id: "settings", label: "Settings", icon: "⚙️" },
 ];
