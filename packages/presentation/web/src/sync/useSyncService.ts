@@ -60,7 +60,7 @@ export function useSyncService(
       service.destroy();
       clearInterval(interval);
     };
-  }, [config?.supabaseUrl, config?.supabaseAnonKey]);
+  }, [config?.supabaseUrl, config?.supabasePublishableKey]);
 
   return { syncService: serviceRef.current, syncStatus, pendingOps, failedOps };
 }

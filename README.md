@@ -161,7 +161,7 @@ The web app is fully offline-first — sync is an optional layer that you bring 
 
 1. Create a free project at [supabase.com](https://supabase.com)
 2. Open **SQL Editor** in the Supabase dashboard and run [`supabase/schema.sql`](./supabase/schema.sql)
-3. Copy your **Project URL** and **anon key** from **Settings → API**
+3. Copy your **Project URL** and **publishable key** from **Settings → API**
 4. Open the app, navigate to the **Settings** tab, paste the credentials, and click **Enable sync**
 
 For the full guide — including multi-device setup, security notes, troubleshooting, and free-tier limits — see [`supabase/README.md`](./supabase/README.md).

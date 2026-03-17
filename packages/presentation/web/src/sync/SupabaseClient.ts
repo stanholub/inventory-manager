@@ -8,9 +8,9 @@ export function getSupabaseClient(config: SyncConfig): SupabaseClient {
   if (
     !cachedClient ||
     cachedConfig?.supabaseUrl !== config.supabaseUrl ||
-    cachedConfig?.supabaseAnonKey !== config.supabaseAnonKey
+    cachedConfig?.supabasePublishableKey !== config.supabasePublishableKey
   ) {
-    cachedClient = createClient(config.supabaseUrl, config.supabaseAnonKey);
+    cachedClient = createClient(config.supabaseUrl, config.supabasePublishableKey);
     cachedConfig = config;
   }
   return cachedClient;

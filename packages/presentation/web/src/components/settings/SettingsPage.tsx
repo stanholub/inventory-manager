@@ -11,7 +11,7 @@ export function SettingsPage() {
   const { canInstall, isInstalled, triggerInstall } = useInstallPrompt();
 
   const [url, setUrl] = useState(syncConfig?.supabaseUrl ?? "");
-  const [key, setKey] = useState(syncConfig?.supabaseAnonKey ?? "");
+  const [key, setKey] = useState(syncConfig?.supabasePublishableKey ?? "");
   const [testState, setTestState] = useState<"idle" | "testing" | "ok" | "error">("idle");
   const [testError, setTestError] = useState("");
   const [saved, setSaved] = useState(false);
@@ -28,7 +28,7 @@ export function SettingsPage() {
       return;
     }
     try {
-      const client = getSupabaseClient({ supabaseUrl: url.trim(), supabaseAnonKey: key.trim() });
+      const client = getSupabaseClient({ supabaseUrl: url.trim(), supabasePublishableKey: key.trim() });
       // A lightweight query – just check we can reach the DB
       const { error } = await client.from("items").select("id").limit(1);
       if (error) {
@@ -52,7 +52,7 @@ export function SettingsPage() {
     if (!trimmedUrl || !trimmedKey) return;
     const urlError = validateSupabaseUrl(trimmedUrl);
     if (urlError) return;
-    const config: SyncConfig = { supabaseUrl: trimmedUrl, supabaseAnonKey: trimmedKey };
+    const config: SyncConfig = { supabaseUrl: trimmedUrl, supabasePublishableKey: trimmedKey };
     setSyncConfig(config);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
@@ -153,7 +153,7 @@ export function SettingsPage() {
 
         <div className={styles.field}>
           <label className={styles.label} htmlFor="supabase-key">
-            Anon / Public Key
+            Publishable Key
           </label>
           <input
             id="supabase-key"
@@ -218,7 +218,7 @@ export function SettingsPage() {
             Open the SQL Editor and run the schema from{" "}
             <code>supabase/schema.sql</code> in this repository
           </li>
-          <li>Copy your <strong>Project URL</strong> and <strong>anon key</strong> from Settings → API</li>
+          <li>Copy your <strong>Project URL</strong> and <strong>publishable key</strong> from Settings → API</li>
           <li>Paste them above and click <strong>Enable sync</strong></li>
         </ol>
       </section>

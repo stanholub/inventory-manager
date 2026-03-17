@@ -5,7 +5,7 @@
 -- Quick start:
 --   1. Open SQL Editor in your Supabase dashboard (Database → SQL Editor)
 --   2. Paste this entire file and click Run
---   3. Copy your Project URL + anon key from Settings → API
+--   3. Copy your Project URL + publishable key from Settings → API
 --   4. Open the app → Settings tab → paste credentials → Enable sync
 -- ─────────────────────────────────────────────────────────────────────────────
 --
@@ -75,17 +75,17 @@ create index if not exists item_types_updated_at_idx on item_types (updated_at);
 -- ── Optional: Row Level Security ────────────────────────────────────────────
 -- If you plan to share this Supabase project with others in the future, or
 -- want to add user-based auth later, uncomment and adapt the lines below.
--- By default, the anon key has full read/write access (appropriate for a
+-- By default, the publishable key has full read/write access (appropriate for a
 -- single-user personal inventory).
 
 -- alter table items      enable row level security;
 -- alter table containers enable row level security;
 -- alter table item_types enable row level security;
 
--- Example open policy (anon key full access – current default behaviour):
--- create policy "anon full access" on items      for all using (true) with check (true);
--- create policy "anon full access" on containers for all using (true) with check (true);
--- create policy "anon full access" on item_types for all using (true) with check (true);
+-- Example open policy (publishable key full access – current default behaviour):
+-- create policy "publishable full access" on items      for all using (true) with check (true);
+-- create policy "publishable full access" on containers for all using (true) with check (true);
+-- create policy "publishable full access" on item_types for all using (true) with check (true);
 
 -- Example user-scoped policy (enable after adding auth):
 -- create policy "user owns rows" on items
