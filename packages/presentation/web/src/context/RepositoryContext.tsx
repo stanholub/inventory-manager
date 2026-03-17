@@ -21,6 +21,7 @@ interface RepositoryContextValue {
   setSyncConfig: (config: SyncConfig | null) => void;
   syncStatus: SyncStatus;
   pendingOps: number;
+  failedOps: number;
   syncService: SyncService | null;
   /** Call after a pull to refresh UI data */
   refreshKey: number;
@@ -56,7 +57,7 @@ export function RepositoryProvider({ children }: { children: ReactNode }) {
     setRefreshKey((k) => k + 1);
   }, []);
 
-  const { syncService, syncStatus, pendingOps } = useSyncService(
+  const { syncService, syncStatus, pendingOps, failedOps } = useSyncService(
     syncConfig,
     queue,
     localItems,
@@ -97,10 +98,11 @@ export function RepositoryProvider({ children }: { children: ReactNode }) {
       setSyncConfig,
       syncStatus,
       pendingOps,
+      failedOps,
       syncService,
       refreshKey,
     }),
-    [itemRepo, containerRepo, itemTypeRepo, syncConfig, setSyncConfig, syncStatus, pendingOps, syncService, refreshKey]
+    [itemRepo, containerRepo, itemTypeRepo, syncConfig, setSyncConfig, syncStatus, pendingOps, failedOps, syncService, refreshKey]
   );
 
   return (

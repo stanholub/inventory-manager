@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { useRepositories } from "../../context/RepositoryContext";
-import { SyncConfig } from "../../sync/SyncConfig";
+import { SyncConfig, validateSupabaseUrl } from "../../sync/SyncConfig";
 import { getSupabaseClient } from "../../sync/SupabaseClient";
 import { getLastSyncedAt } from "../../sync/SyncConfig";
 import styles from "./SettingsPage.module.css";
 
 export function SettingsPage() {
-  const { syncConfig, setSyncConfig, syncStatus, pendingOps, syncService } = useRepositories();
+  const { syncConfig, setSyncConfig, syncStatus, pendingOps, failedOps, syncService } = useRepositories();
 
   const [url, setUrl] = useState(syncConfig?.supabaseUrl ?? "");
   const [key, setKey] = useState(syncConfig?.supabaseAnonKey ?? "");
@@ -19,13 +19,23 @@ export function SettingsPage() {
   const handleTest = async () => {
     setTestState("testing");
     setTestError("");
+    const urlError = validateSupabaseUrl(url.trim());
+    if (urlError) {
+      setTestState("error");
+      setTestError(`Invalid URL: ${urlError}`);
+      return;
+    }
     try {
-      const client = getSupabaseClient({ supabaseUrl: url, supabaseAnonKey: key });
+      const client = getSupabaseClient({ supabaseUrl: url.trim(), supabaseAnonKey: key.trim() });
       // A lightweight query – just check we can reach the DB
       const { error } = await client.from("items").select("id").limit(1);
-      if (error && error.code !== "PGRST116") {
-        // PGRST116 = "table not found" which means connection works but schema not set up yet
-        throw new Error(error.message);
+      if (error) {
+        if (error.code === "PGRST116") {
+          // Table not found — connection works but schema not set up yet
+          setTestState("ok");
+          return;
+        }
+        throw new Error("Connection failed: " + error.message);
       }
       setTestState("ok");
     } catch (e) {
@@ -35,8 +45,12 @@ export function SettingsPage() {
   };
 
   const handleSave = () => {
-    if (!url.trim() || !key.trim()) return;
-    const config: SyncConfig = { supabaseUrl: url.trim(), supabaseAnonKey: key.trim() };
+    const trimmedUrl = url.trim();
+    const trimmedKey = key.trim();
+    if (!trimmedUrl || !trimmedKey) return;
+    const urlError = validateSupabaseUrl(trimmedUrl);
+    if (urlError) return;
+    const config: SyncConfig = { supabaseUrl: trimmedUrl, supabaseAnonKey: trimmedKey };
     setSyncConfig(config);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
@@ -92,6 +106,11 @@ export function SettingsPage() {
               <span className={styles.pendingBadge}>{pendingOps} pending</span>
             )}
           </div>
+        )}
+        {failedOps > 0 && (
+          <p className={styles.errorMsg}>
+            {failedOps} sync operation{failedOps > 1 ? "s" : ""} permanently failed after repeated retries and were discarded. Some local changes may not have been saved to the cloud.
+          </p>
         )}
 
         <div className={styles.field}>

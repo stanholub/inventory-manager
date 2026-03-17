@@ -10,6 +10,7 @@ interface UseSyncServiceResult {
   syncService: SyncService | null;
   syncStatus: SyncStatus;
   pendingOps: number;
+  failedOps: number;
 }
 
 export function useSyncService(
@@ -22,6 +23,7 @@ export function useSyncService(
 ): UseSyncServiceResult {
   const [syncStatus, setSyncStatus] = useState<SyncStatus>({ state: "idle" });
   const [pendingOps, setPendingOps] = useState(0);
+  const [failedOps, setFailedOps] = useState(0);
   const serviceRef = useRef<SyncService | null>(null);
 
   useEffect(() => {
@@ -40,6 +42,7 @@ export function useSyncService(
       if (status.state === "synced") {
         onDataChanged();
         queue.size().then(setPendingOps);
+        setFailedOps(service.getFailedOpsCount());
       }
     });
 
@@ -49,6 +52,7 @@ export function useSyncService(
     // Refresh pending count periodically
     const interval = setInterval(() => {
       queue.size().then(setPendingOps);
+      setFailedOps(service.getFailedOpsCount());
     }, 5000);
 
     return () => {
@@ -58,5 +62,5 @@ export function useSyncService(
     };
   }, [config?.supabaseUrl, config?.supabaseAnonKey]);
 
-  return { syncService: serviceRef.current, syncStatus, pendingOps };
+  return { syncService: serviceRef.current, syncStatus, pendingOps, failedOps };
 }

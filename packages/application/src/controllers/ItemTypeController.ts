@@ -15,6 +15,12 @@ export class ItemTypeController {
     if (!name?.trim()) {
       throw new Error("Item type name cannot be empty");
     }
+    if (name.trim().length > 255) {
+      throw new Error("Item type name cannot exceed 255 characters");
+    }
+    if (description && description.length > 1000) {
+      throw new Error("Description cannot exceed 1000 characters");
+    }
     return await this.addItemTypeUseCase.execute({ name: name.trim(), description });
   }
 
@@ -28,6 +34,12 @@ export class ItemTypeController {
   ): Promise<UpdateItemTypeResponse> {
     if (!id?.trim()) {
       throw new Error("Item type ID cannot be empty");
+    }
+    if (fields.name !== undefined && fields.name.trim().length > 255) {
+      throw new Error("Item type name cannot exceed 255 characters");
+    }
+    if (fields.description && fields.description.length > 1000) {
+      throw new Error("Description cannot exceed 1000 characters");
     }
     return await this.updateItemTypeUseCase.execute({ id: id.trim(), ...fields });
   }
