@@ -12,6 +12,14 @@ export class ItemType {
     public readonly id: string,
     public name: string,
     public fields: ItemTypeField[] = [],
-    public description?: string
+    public description?: string,
+    public updatedAt: string = new Date().toISOString(),
+    public deviceId?: string,
+    public deletedAt?: string
   ) {}
+
+  touch(deviceId: string) {
+    this.updatedAt = new Date().toISOString();
+    this.deviceId = deviceId;
+  }
 }

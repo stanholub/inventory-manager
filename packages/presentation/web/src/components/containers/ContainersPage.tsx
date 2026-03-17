@@ -16,8 +16,8 @@ interface ContainersPageProps {
 }
 
 export function ContainersPage({ onNavigateToContainer }: ContainersPageProps) {
-  const { containerRepo } = useRepositories();
-  const { containers, error, addContainer, updateContainer, deleteContainer } = useContainers(containerRepo);
+  const { containerRepo, refreshKey } = useRepositories();
+  const { containers, error, addContainer, updateContainer, deleteContainer } = useContainers(containerRepo, refreshKey);
 
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<ListContainersResponse | null>(null);

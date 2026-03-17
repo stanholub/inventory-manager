@@ -17,10 +17,10 @@ interface ItemsPageProps {
 }
 
 export function ItemsPage({ filterContainerId, onClearFilter }: ItemsPageProps) {
-  const { itemRepo, containerRepo, itemTypeRepo } = useRepositories();
-  const { items, error, addItem, updateItem, deleteItem } = useItems(itemRepo);
-  const { containers } = useContainers(containerRepo);
-  const { itemTypes } = useItemTypes(itemTypeRepo);
+  const { itemRepo, containerRepo, itemTypeRepo, refreshKey } = useRepositories();
+  const { items, error, addItem, updateItem, deleteItem } = useItems(itemRepo, refreshKey);
+  const { containers } = useContainers(containerRepo, refreshKey);
+  const { itemTypes } = useItemTypes(itemTypeRepo, refreshKey);
 
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<ListItemsResponse | null>(null);

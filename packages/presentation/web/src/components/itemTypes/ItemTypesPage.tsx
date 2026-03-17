@@ -10,8 +10,8 @@ import { ErrorBanner } from "../ui/ErrorBanner";
 import styles from "./ItemTypesPage.module.css";
 
 export function ItemTypesPage() {
-  const { itemTypeRepo } = useRepositories();
-  const { itemTypes, error, addItemType, updateItemType, deleteItemType } = useItemTypes(itemTypeRepo);
+  const { itemTypeRepo, refreshKey } = useRepositories();
+  const { itemTypes, error, addItemType, updateItemType, deleteItemType } = useItemTypes(itemTypeRepo, refreshKey);
 
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<ListItemTypesResponse | null>(null);

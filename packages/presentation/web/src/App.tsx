@@ -3,14 +3,17 @@ import { RepositoryProvider } from "./context/RepositoryContext";
 import { ItemsPage } from "./components/items/ItemsPage";
 import { ContainersPage } from "./components/containers/ContainersPage";
 import { ItemTypesPage } from "./components/itemTypes/ItemTypesPage";
+import { SettingsPage } from "./components/settings/SettingsPage";
 import { BottomNav } from "./components/layout/BottomNav";
+import { SyncStatusIndicator } from "./components/layout/SyncStatusIndicator";
 
-type Page = "items" | "containers" | "itemTypes";
+type Page = "items" | "containers" | "itemTypes" | "settings";
 
 const pageTitles: Record<Page, string> = {
   items: "Items",
   containers: "Containers",
   itemTypes: "Item Types",
+  settings: "Settings",
 };
 
 export function App() {
@@ -30,8 +33,12 @@ export function App() {
         borderBottom: "1px solid var(--color-border)",
         fontWeight: 600,
         fontSize: "1.125rem",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
       }}>
-        {pageTitles[page]}
+        <span>{pageTitles[page]}</span>
+        <SyncStatusIndicator />
       </header>
 
       <main style={{ flex: 1, overflowY: "auto" }}>
@@ -45,6 +52,7 @@ export function App() {
           <ContainersPage onNavigateToContainer={handleNavigateToContainer} />
         )}
         {page === "itemTypes" && <ItemTypesPage />}
+        {page === "settings" && <SettingsPage />}
       </main>
 
       <BottomNav page={page} onNavigate={(p) => { setPage(p); if (p !== "items") setFilterContainerId(null); }} />

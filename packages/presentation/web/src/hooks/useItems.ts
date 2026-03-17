@@ -9,7 +9,7 @@ import {
   ListItemsResponse,
 } from "@inventory/core";
 
-export function useItems(itemRepo: ItemRepository) {
+export function useItems(itemRepo: ItemRepository, refreshKey?: number) {
   const [items, setItems] = useState<ListItemsResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -86,7 +86,7 @@ export function useItems(itemRepo: ItemRepository) {
 
   useEffect(() => {
     refresh();
-  }, [refresh]);
+  }, [refresh, refreshKey]);
 
   return { items, loading, error, refresh, addItem, updateItem, updateItemQty, deleteItem };
 }

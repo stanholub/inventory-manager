@@ -8,7 +8,10 @@ export class Item {
     public containerId?: string,
     public typeId?: string,
     public barcode?: string,
-    public fieldValues: Record<string, string | number | boolean> = {}
+    public fieldValues: Record<string, string | number | boolean> = {},
+    public updatedAt: string = new Date().toISOString(),
+    public deviceId?: string,
+    public deletedAt?: string
   ) {}
 
   increase(qty: number) {
@@ -22,5 +25,10 @@ export class Item {
 
   setQuantity(qty: number) {
     this.quantity = qty;
+  }
+
+  touch(deviceId: string) {
+    this.updatedAt = new Date().toISOString();
+    this.deviceId = deviceId;
   }
 }
