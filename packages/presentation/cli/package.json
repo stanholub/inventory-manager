@@ -1,0 +1,20 @@
+{
+  "name": "@inventory/cli",
+  "version": "0.1.0",
+  "main": "src/index.ts",
+  "bin": {
+    "inventory": "dist/index.js"
+  },
+  "scripts": {
+    "dev": "node --no-warnings --import tsx --watch src/index.ts",
+    "build": "tsup src/index.ts"
+  },
+  "dependencies": {
+    "@inquirer/prompts": "^7.10.1",
+    "@inventory/core": "workspace:*",
+    "@inventory/infrastructure": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.20.6"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "@inventory/core",
+  "version": "0.1.0",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts",
+    "dev": "tsup --watch"
+  },
+  "dependencies": {
+    "@inventory/domain": "workspace:*"
+  }
+}
