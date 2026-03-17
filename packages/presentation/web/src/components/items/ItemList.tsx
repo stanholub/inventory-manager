@@ -17,8 +17,8 @@ export function ItemList({ items, containers, itemTypes, onEdit, onDelete }: Ite
   return (
     <ul className={styles.list}>
       {items.map((item) => {
-        const container = containers.find((c) => c.id === (item as any).containerId);
-        const itemType = itemTypes.find((t) => t.id === (item as any).typeId);
+        const container = containers.find((c) => c.id === item.containerId);
+        const itemType = itemTypes.find((t) => t.id === item.typeId);
         return (
           <li key={item.id} className={styles.card}>
             <div className={styles.info}>

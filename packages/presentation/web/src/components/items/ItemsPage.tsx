@@ -72,8 +72,8 @@ export function ItemsPage() {
             initial={{
               name: editing.name,
               quantity: editing.quantity,
-              containerId: (editing as any).containerId,
-              typeId: (editing as any).typeId,
+              containerId: editing.containerId ?? null,
+              typeId: editing.typeId ?? null,
             }}
             containers={containers}
             itemTypes={itemTypes}

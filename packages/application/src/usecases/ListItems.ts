@@ -6,6 +6,8 @@ export interface ListItemsResponse {
   id: string;
   name: string;
   quantity: number;
+  containerId?: string;
+  typeId?: string;
 }
 
 export class ListItems implements IUseCase<void, ListItemsResponse[]> {
@@ -18,6 +20,8 @@ export class ListItems implements IUseCase<void, ListItemsResponse[]> {
       id: item.id,
       name: item.name,
       quantity: item.quantity,
+      containerId: item.containerId,
+      typeId: item.typeId,
     }));
   }
 }
