@@ -1,6 +1,6 @@
 export interface SyncConfig {
   supabaseUrl: string;
-  supabaseAnonKey: string;
+  supabasePublishableKey: string;
 }
 
 const STORAGE_KEY = "inventory_sync_config";
@@ -31,7 +31,14 @@ export function getSyncConfig(): SyncConfig | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
-    return JSON.parse(raw) as SyncConfig;
+    const parsed = JSON.parse(raw) as Record<string, unknown>;
+    // Migrate legacy anon key field to publishable key
+    if ("supabaseAnonKey" in parsed && !("supabasePublishableKey" in parsed)) {
+      parsed.supabasePublishableKey = parsed.supabaseAnonKey;
+      delete parsed.supabaseAnonKey;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+    }
+    return parsed as unknown as SyncConfig;
   } catch {
     return null;
   }

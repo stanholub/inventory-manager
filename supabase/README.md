@@ -63,16 +63,16 @@ You should see a success message. You can verify the tables were created by open
 1. In the Supabase dashboard, go to **Settings → API** (or **Project Settings → API**)
 2. Copy two values:
    - **Project URL** — looks like `https://xxxxxxxxxxxxxxxxxxxx.supabase.co`
-   - **Project API keys → `anon` / `public`** — a long JWT string starting with `eyJ…`
+   - **Project API keys → `publishable`** — a long JWT string starting with `eyJ…`
 
-> **Important:** Copy the `anon` key, **not** the `service_role` key.
+> **Important:** Copy the `publishable` key, **not** the `service_role` key.
 >
 > | Key | When to use |
 > |-----|-------------|
-> | `anon` | Safe for browsers and mobile apps. Use this one. |
+> | `publishable` | Safe for browsers and mobile apps. Use this one. |
 > | `service_role` | Bypasses Row Level Security. Never expose this in a browser — it gives full database access. |
 
-The anon key is safe to use in the browser because:
+The publishable key is safe to use in the browser because:
 - It is designed for client-side use
 - Without Row Level Security it has full table access, which is fine when you own the entire project
 - If you ever share the project with others, you can enable RLS (see [Security notes](#security-notes))
@@ -84,7 +84,7 @@ The anon key is safe to use in the browser because:
 1. Open the Inventory Manager web app
 2. Tap the **Settings** tab in the bottom navigation
 3. Paste your **Project URL** into the _Project URL_ field
-4. Paste your **anon key** into the _Anon / Public Key_ field
+4. Paste your **publishable key** into the _Publishable Key_ field
 5. Click **Test connection** — you should see "Connection OK"
    - If you see an error, double-check the values and see [Troubleshooting](#troubleshooting)
 6. Click **Enable sync**
@@ -136,9 +136,9 @@ There is no limit on the number of devices. Each device syncs independently.
 
 ### Current model (no RLS)
 
-By default, `schema.sql` does **not** enable Row Level Security. The anon key has full read/write access to all three tables. This is appropriate when:
+By default, `schema.sql` does **not** enable Row Level Security. The publishable key has full read/write access to all three tables. This is appropriate when:
 - You are the sole user of this Supabase project
-- You do not share your anon key with anyone
+- You do not share your publishable key with anyone
 
 ### Enabling Row Level Security
 
@@ -151,7 +151,7 @@ alter table containers enable row level security;
 alter table item_types enable row level security;
 
 -- Open policy (keeps current behaviour, but makes it explicit)
-create policy "anon full access" on items
+create policy "publishable full access" on items
   for all using (true) with check (true);
 ```
 
@@ -165,7 +165,7 @@ create policy "user owns rows" on items
 
 ### Where credentials are stored
 
-Your Project URL and anon key are stored in your **browser's localStorage** under the key `inventory_sync_config`. They are never sent anywhere except directly to your Supabase project. They are not included in the app bundle or source code.
+Your Project URL and publishable key are stored in your **browser's localStorage** under the key `inventory_sync_config`. They are never sent anywhere except directly to your Supabase project. They are not included in the app bundle or source code.
 
 ---
 
@@ -213,11 +213,11 @@ The **Project URL** is likely wrong. Make sure it is the full URL including `htt
 
 ### Test connection gives a 401 Unauthorized error
 
-You may have pasted the `service_role` key instead of the `anon` key, or the key is from a different project than the URL. Double-check both values.
+You may have pasted the `service_role` key instead of the `publishable` key, or the key is from a different project than the URL. Double-check both values.
 
 ### Sync gets stuck on "Syncing…"
 
-Check that your browser has an internet connection. If the problem persists, open browser DevTools → Console and look for error messages starting with "Supabase". A common cause is an expired or revoked API key — regenerate it in the Supabase dashboard under **Settings → API → Reveal** and update it in Settings.
+Check that your browser has an internet connection. If the problem persists, open browser DevTools → Console and look for error messages starting with "Supabase". A common cause is an expired or revoked publishable key — regenerate it in the Supabase dashboard under **Settings → API → Reveal** and update it in Settings.
 
 ### Changes from another device don't appear
 
