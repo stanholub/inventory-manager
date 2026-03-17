@@ -1,13 +1,39 @@
 import { useState } from "react";
+import {
+  Stack,
+  TextInput,
+  PasswordInput,
+  Button,
+  Group,
+  Text,
+  Badge,
+  Title,
+  Divider,
+  Anchor,
+  Alert,
+  Paper,
+  List,
+  Code,
+  Tabs,
+} from "@mantine/core";
+import {
+  IconAlertCircle,
+  IconCheck,
+  IconUser,
+  IconLogout,
+  IconLogin,
+  IconUserPlus,
+} from "@tabler/icons-react";
 import { useRepositories } from "../../context/RepositoryContext";
+import { useAuth } from "../../context/AuthContext";
 import { SyncConfig, validateSupabaseUrl } from "../../sync/SyncConfig";
 import { getSupabaseClient } from "../../sync/SupabaseClient";
 import { getLastSyncedAt } from "../../sync/SyncConfig";
 import { useInstallPrompt } from "../../hooks/useInstallPrompt";
-import styles from "./SettingsPage.module.css";
 
 export function SettingsPage() {
   const { syncConfig, setSyncConfig, syncStatus, pendingOps, failedOps, syncService } = useRepositories();
+  const { user, authLoading, authError, signUp, signIn, signOut } = useAuth();
   const { canInstall, isInstalled, triggerInstall } = useInstallPrompt();
 
   const [url, setUrl] = useState(syncConfig?.supabaseUrl ?? "");
@@ -15,6 +41,10 @@ export function SettingsPage() {
   const [testState, setTestState] = useState<"idle" | "testing" | "ok" | "error">("idle");
   const [testError, setTestError] = useState("");
   const [saved, setSaved] = useState(false);
+
+  const [authEmail, setAuthEmail] = useState("");
+  const [authPassword, setAuthPassword] = useState("");
+  const [authTab, setAuthTab] = useState<string>("signin");
 
   const lastSyncedAt = getLastSyncedAt();
 
@@ -29,11 +59,9 @@ export function SettingsPage() {
     }
     try {
       const client = getSupabaseClient({ supabaseUrl: url.trim(), supabasePublishableKey: key.trim() });
-      // A lightweight query – just check we can reach the DB
       const { error } = await client.from("items").select("id").limit(1);
       if (error) {
         if (error.code === "PGRST116") {
-          // Table not found — connection works but schema not set up yet
           setTestState("ok");
           return;
         }
@@ -69,159 +97,265 @@ export function SettingsPage() {
     syncService?.sync();
   };
 
-  const statusLabel = (() => {
-    switch (syncStatus.state) {
-      case "syncing": return "Syncing…";
-      case "synced": return `Synced ${new Date(syncStatus.at).toLocaleTimeString()}`;
-      case "error": return `Sync error: ${syncStatus.message}`;
-      default: return syncConfig ? "Idle" : "Not configured";
+  const handleSignIn = async () => {
+    try {
+      await signIn(authEmail, authPassword);
+    } catch {
+      // error shown via authError
     }
-  })();
+  };
 
-  const statusClass = (() => {
-    switch (syncStatus.state) {
-      case "syncing": return styles.statusSyncing;
-      case "synced": return styles.statusOk;
-      case "error": return styles.statusError;
-      default: return styles.statusIdle;
+  const handleSignUp = async () => {
+    try {
+      await signUp(authEmail, authPassword);
+    } catch {
+      // error shown via authError
     }
-  })();
+  };
+
+  const syncStatusColor =
+    syncStatus.state === "syncing" ? "blue" :
+    syncStatus.state === "synced" ? "green" :
+    syncStatus.state === "error" ? "red" :
+    "gray";
+
+  const syncStatusLabel =
+    syncStatus.state === "syncing" ? "Syncing…" :
+    syncStatus.state === "synced" ? `Synced ${new Date((syncStatus as { at: string }).at).toLocaleTimeString()}` :
+    syncStatus.state === "error" ? `Error: ${(syncStatus as { message: string }).message}` :
+    syncConfig ? "Idle" : "Not configured";
 
   return (
-    <div className={styles.page}>
+    <Stack gap="lg" p="md" pb={80}>
+
+      {/* Install App */}
       {(canInstall || isInstalled) && (
-        <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>Install App</h2>
+        <Paper p="md" withBorder>
+          <Title order={5} mb="sm">Install App</Title>
           {isInstalled ? (
-            <p className={styles.description}>
+            <Text size="sm" c="dimmed">
               ✓ Inventory Manager is installed on this device and works offline.
-            </p>
+            </Text>
           ) : (
             <>
-              <p className={styles.description}>
+              <Text size="sm" c="dimmed" mb="sm">
                 Install this app on your device for quick access and full offline use — no app store needed.
-              </p>
-              <div className={styles.actions}>
-                <button className={styles.btnPrimary} onClick={triggerInstall}>
-                  Install app
-                </button>
-              </div>
+              </Text>
+              <Button onClick={triggerInstall}>Install app</Button>
             </>
           )}
-        </section>
+        </Paper>
       )}
 
-      <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>Cloud Sync</h2>
-        <p className={styles.description}>
+      {/* Cloud Sync */}
+      <Paper p="md" withBorder>
+        <Title order={5} mb="sm">Cloud Sync</Title>
+        <Text size="sm" c="dimmed" mb="md">
           Connect your own{" "}
-          <a href="https://supabase.com" target="_blank" rel="noopener noreferrer">
+          <Anchor href="https://supabase.com" target="_blank" rel="noopener noreferrer">
             Supabase
-          </a>{" "}
-          project to sync data across devices. Your data stays in your own database — this app
-          never accesses a shared server.
-        </p>
+          </Anchor>{" "}
+          project to sync data across devices. Your data stays in your own database.
+        </Text>
 
         {syncConfig && (
-          <div className={`${styles.statusBar} ${statusClass}`}>
-            <span className={styles.statusDot} />
-            <span>{statusLabel}</span>
+          <Group mb="sm">
+            <Badge color={syncStatusColor} variant="light">
+              {syncStatusLabel}
+            </Badge>
             {pendingOps > 0 && (
-              <span className={styles.pendingBadge}>{pendingOps} pending</span>
+              <Badge color="orange" variant="light">{pendingOps} pending</Badge>
             )}
-          </div>
-        )}
-        {failedOps > 0 && (
-          <p className={styles.errorMsg}>
-            {failedOps} sync operation{failedOps > 1 ? "s" : ""} permanently failed after repeated retries and were discarded. Some local changes may not have been saved to the cloud.
-          </p>
+          </Group>
         )}
 
-        <div className={styles.field}>
-          <label className={styles.label} htmlFor="supabase-url">
-            Project URL
-          </label>
-          <input
+        {failedOps > 0 && (
+          <Alert icon={<IconAlertCircle size={16} />} color="red" mb="sm">
+            {failedOps} sync operation{failedOps > 1 ? "s" : ""} permanently failed after repeated retries. Some changes may not have synced.
+          </Alert>
+        )}
+
+        <Stack gap="sm">
+          <TextInput
+            label="Project URL"
             id="supabase-url"
-            className={styles.input}
             type="url"
             placeholder="https://xxxxxxxxxxxx.supabase.co"
             value={url}
             onChange={(e) => { setUrl(e.target.value); setTestState("idle"); setSaved(false); }}
           />
-        </div>
-
-        <div className={styles.field}>
-          <label className={styles.label} htmlFor="supabase-key">
-            Publishable Key
-          </label>
-          <input
+          <PasswordInput
+            label="Publishable Key"
             id="supabase-key"
-            className={styles.input}
-            type="password"
             placeholder="eyJ…"
             value={key}
             onChange={(e) => { setKey(e.target.value); setTestState("idle"); setSaved(false); }}
+            description="Find this in your Supabase project under Settings → API → Project API keys."
           />
-          <p className={styles.hint}>
-            Find this in your Supabase project under Settings → API → Project API keys.
-          </p>
-        </div>
 
-        {testState === "error" && (
-          <p className={styles.errorMsg}>{testError}</p>
-        )}
+          {testState === "error" && (
+            <Alert icon={<IconAlertCircle size={16} />} color="red">{testError}</Alert>
+          )}
 
-        <div className={styles.actions}>
-          <button
-            className={styles.btnSecondary}
-            onClick={handleTest}
-            disabled={!url.trim() || !key.trim() || testState === "testing"}
-          >
-            {testState === "testing" ? "Testing…" : testState === "ok" ? "Connection OK" : "Test connection"}
-          </button>
+          <Group>
+            <Button
+              variant="default"
+              onClick={handleTest}
+              disabled={!url.trim() || !key.trim() || testState === "testing"}
+              leftSection={testState === "ok" ? <IconCheck size={16} /> : undefined}
+            >
+              {testState === "testing" ? "Testing…" : testState === "ok" ? "Connection OK" : "Test connection"}
+            </Button>
 
-          <button
-            className={styles.btnPrimary}
-            onClick={handleSave}
-            disabled={!url.trim() || !key.trim()}
-          >
-            {saved ? "Saved!" : syncConfig ? "Update" : "Enable sync"}
-          </button>
+            <Button
+              onClick={handleSave}
+              disabled={!url.trim() || !key.trim()}
+            >
+              {saved ? "Saved!" : syncConfig ? "Update" : "Enable sync"}
+            </Button>
+
+            {syncConfig && (
+              <Button color="red" variant="light" onClick={handleDisconnect}>
+                Disconnect
+              </Button>
+            )}
+          </Group>
 
           {syncConfig && (
-            <button className={styles.btnDanger} onClick={handleDisconnect}>
-              Disconnect
-            </button>
+            <Group>
+              <Button variant="default" onClick={handleSyncNow} disabled={syncStatus.state === "syncing"}>
+                Sync now
+              </Button>
+              {lastSyncedAt && (
+                <Text size="xs" c="dimmed">
+                  Last synced: {new Date(lastSyncedAt).toLocaleString()}
+                </Text>
+              )}
+            </Group>
           )}
-        </div>
+        </Stack>
+      </Paper>
 
-        {syncConfig && (
-          <div className={styles.syncActions}>
-            <button className={styles.btnSecondary} onClick={handleSyncNow} disabled={syncStatus.state === "syncing"}>
-              Sync now
-            </button>
-            {lastSyncedAt && (
-              <p className={styles.hint}>
-                Last synced: {new Date(lastSyncedAt).toLocaleString()}
-              </p>
-            )}
-          </div>
-        )}
-      </section>
+      {/* Multi-user: Authentication */}
+      {syncConfig && (
+        <Paper p="md" withBorder>
+          <Title order={5} mb="sm">User Account</Title>
+          <Text size="sm" c="dimmed" mb="md">
+            Sign in to your Supabase account to keep your data private and separate from other users
+            sharing the same Supabase project.
+          </Text>
 
-      <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>Setup guide</h2>
-        <ol className={styles.guide}>
-          <li>Create a free project at <a href="https://supabase.com" target="_blank" rel="noopener noreferrer">supabase.com</a></li>
-          <li>
+          {user ? (
+            <Stack gap="sm">
+              <Group>
+                <IconUser size={16} />
+                <Text size="sm" fw={500}>{user.email}</Text>
+                <Badge color="green" size="sm">Signed in</Badge>
+              </Group>
+              <Button
+                variant="light"
+                color="gray"
+                leftSection={<IconLogout size={16} />}
+                onClick={signOut}
+                style={{ alignSelf: "flex-start" }}
+              >
+                Sign out
+              </Button>
+            </Stack>
+          ) : (
+            <Stack gap="sm">
+              {authError && (
+                <Alert icon={<IconAlertCircle size={16} />} color="red">{authError}</Alert>
+              )}
+              <Tabs value={authTab} onChange={(v) => v && setAuthTab(v)}>
+                <Tabs.List mb="sm">
+                  <Tabs.Tab value="signin" leftSection={<IconLogin size={14} />}>Sign in</Tabs.Tab>
+                  <Tabs.Tab value="signup" leftSection={<IconUserPlus size={14} />}>Sign up</Tabs.Tab>
+                </Tabs.List>
+                <Tabs.Panel value="signin">
+                  <Stack gap="sm">
+                    <TextInput
+                      label="Email"
+                      type="email"
+                      value={authEmail}
+                      onChange={(e) => setAuthEmail(e.target.value)}
+                      placeholder="you@example.com"
+                    />
+                    <PasswordInput
+                      label="Password"
+                      value={authPassword}
+                      onChange={(e) => setAuthPassword(e.target.value)}
+                    />
+                    <Button
+                      leftSection={<IconLogin size={16} />}
+                      onClick={handleSignIn}
+                      loading={authLoading}
+                      disabled={!authEmail || !authPassword}
+                      style={{ alignSelf: "flex-start" }}
+                    >
+                      Sign in
+                    </Button>
+                  </Stack>
+                </Tabs.Panel>
+                <Tabs.Panel value="signup">
+                  <Stack gap="sm">
+                    <TextInput
+                      label="Email"
+                      type="email"
+                      value={authEmail}
+                      onChange={(e) => setAuthEmail(e.target.value)}
+                      placeholder="you@example.com"
+                    />
+                    <PasswordInput
+                      label="Password"
+                      value={authPassword}
+                      onChange={(e) => setAuthPassword(e.target.value)}
+                      description="Use a strong password with at least 8 characters."
+                    />
+                    <Button
+                      leftSection={<IconUserPlus size={16} />}
+                      onClick={handleSignUp}
+                      loading={authLoading}
+                      disabled={!authEmail || !authPassword}
+                      style={{ alignSelf: "flex-start" }}
+                    >
+                      Create account
+                    </Button>
+                  </Stack>
+                </Tabs.Panel>
+              </Tabs>
+            </Stack>
+          )}
+        </Paper>
+      )}
+
+      <Divider />
+
+      {/* Setup guide */}
+      <Paper p="md" withBorder>
+        <Title order={5} mb="sm">Setup guide</Title>
+        <List size="sm" spacing="xs">
+          <List.Item>
+            Create a free project at{" "}
+            <Anchor href="https://supabase.com" target="_blank" rel="noopener noreferrer">
+              supabase.com
+            </Anchor>
+          </List.Item>
+          <List.Item>
             Open the SQL Editor and run the schema from{" "}
-            <code>supabase/schema.sql</code> in this repository
-          </li>
-          <li>Copy your <strong>Project URL</strong> and <strong>publishable key</strong> from Settings → API</li>
-          <li>Paste them above and click <strong>Enable sync</strong></li>
-        </ol>
-      </section>
-    </div>
+            <Code>supabase/schema.sql</Code> in this repository
+          </List.Item>
+          <List.Item>
+            Copy your <strong>Project URL</strong> and <strong>publishable key</strong> from Settings → API
+          </List.Item>
+          <List.Item>
+            Paste them above and click <strong>Enable sync</strong>
+          </List.Item>
+          <List.Item>
+            Optionally create a user account above for data isolation when sharing a Supabase project
+          </List.Item>
+        </List>
+      </Paper>
+    </Stack>
   );
 }

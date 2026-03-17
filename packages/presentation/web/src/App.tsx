@@ -1,9 +1,20 @@
 import { useState } from "react";
+import {
+  AppShell,
+  Tabs,
+  Group,
+  Title,
+  rem,
+} from "@mantine/core";
+import {
+  IconHome,
+  IconTag,
+  IconSettings,
+} from "@tabler/icons-react";
 import { RepositoryProvider } from "./context/RepositoryContext";
 import { InventoryPage } from "./components/inventory/InventoryPage";
 import { ItemTypesPage } from "./components/itemTypes/ItemTypesPage";
 import { SettingsPage } from "./components/settings/SettingsPage";
-import { BottomNav } from "./components/layout/BottomNav";
 import { SyncStatusIndicator } from "./components/layout/SyncStatusIndicator";
 import { useInstallPrompt } from "./hooks/useInstallPrompt";
 
@@ -20,7 +31,7 @@ function InstallBanner() {
   if (!canInstall) return null;
   return (
     <div style={{
-      background: "var(--color-primary)",
+      background: "var(--mantine-color-blue-6)",
       color: "#fff",
       padding: "8px 16px",
       display: "flex",
@@ -34,7 +45,7 @@ function InstallBanner() {
         onClick={triggerInstall}
         style={{
           background: "#fff",
-          color: "var(--color-primary)",
+          color: "var(--mantine-color-blue-6)",
           border: "none",
           borderRadius: "6px",
           padding: "4px 12px",
@@ -55,28 +66,64 @@ export function App() {
 
   return (
     <RepositoryProvider>
-      <header style={{
-        padding: "12px 16px",
-        background: "var(--color-surface)",
-        borderBottom: "1px solid var(--color-border)",
-        fontWeight: 600,
-        fontSize: "1.125rem",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-      }}>
-        <span>{pageTitles[page]}</span>
-        <SyncStatusIndicator />
-      </header>
-      <InstallBanner />
+      <AppShell
+        header={{ height: 52 }}
+        footer={{ height: 60 }}
+        padding={0}
+      >
+        <AppShell.Header>
+          <Group h="100%" px="md" justify="space-between">
+            <Title order={4}>{pageTitles[page]}</Title>
+            <SyncStatusIndicator />
+          </Group>
+        </AppShell.Header>
 
-      <main style={{ flex: 1, overflowY: "auto" }}>
-        {page === "inventory" && <InventoryPage />}
-        {page === "itemTypes" && <ItemTypesPage />}
-        {page === "settings" && <SettingsPage />}
-      </main>
+        <AppShell.Main style={{ display: "flex", flexDirection: "column" }}>
+          <InstallBanner />
+          <div style={{ flex: 1, overflowY: "auto" }}>
+            {page === "inventory" && <InventoryPage />}
+            {page === "itemTypes" && <ItemTypesPage />}
+            {page === "settings" && <SettingsPage />}
+          </div>
+        </AppShell.Main>
 
-      <BottomNav page={page} onNavigate={setPage} />
+        <AppShell.Footer>
+          <Tabs
+            value={page}
+            onChange={(v) => v && setPage(v as Page)}
+            h="100%"
+            styles={{
+              root: { height: "100%" },
+              list: {
+                height: "100%",
+                display: "flex",
+                borderTop: "1px solid var(--mantine-color-default-border)",
+                borderBottom: "none",
+              },
+              tab: {
+                flex: 1,
+                flexDirection: "column",
+                gap: rem(2),
+                borderRadius: 0,
+                height: "100%",
+                fontSize: "0.7rem",
+              },
+            }}
+          >
+            <Tabs.List>
+              <Tabs.Tab value="inventory" leftSection={<IconHome size={20} />}>
+                Inventory
+              </Tabs.Tab>
+              <Tabs.Tab value="itemTypes" leftSection={<IconTag size={20} />}>
+                Types
+              </Tabs.Tab>
+              <Tabs.Tab value="settings" leftSection={<IconSettings size={20} />}>
+                Settings
+              </Tabs.Tab>
+            </Tabs.List>
+          </Tabs>
+        </AppShell.Footer>
+      </AppShell>
     </RepositoryProvider>
   );
 }

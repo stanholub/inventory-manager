@@ -1,4 +1,25 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import {
+  TextInput,
+  Select,
+  Group,
+  Breadcrumbs,
+  Anchor,
+  ActionIcon,
+  Menu,
+  Stack,
+  Badge,
+  Text,
+  Paper,
+} from "@mantine/core";
+import {
+  IconPlus,
+  IconQrcode,
+  IconSearch,
+  IconFilter,
+  IconFolder,
+  IconPackage,
+} from "@tabler/icons-react";
 import { ListContainersResponse, ListItemsResponse } from "@inventory/core";
 import { useRepositories } from "../../context/RepositoryContext";
 import { useItems } from "../../hooks/useItems";
@@ -12,7 +33,6 @@ import { ConfirmDialog } from "../ui/ConfirmDialog";
 import { ErrorBanner } from "../ui/ErrorBanner";
 import { QRCodeDisplay } from "../ui/QRCodeDisplay";
 import { BarcodeScanner } from "../ui/BarcodeScanner";
-import styles from "./InventoryPage.module.css";
 
 function getAncestorPath(
   containerId: string | null,
@@ -34,6 +54,8 @@ export function InventoryPage() {
   const { itemTypes } = useItemTypes(itemTypeRepo, refreshKey);
 
   const [currentContainerId, setCurrentContainerId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [typeFilter, setTypeFilter] = useState<string | null>(null);
 
   const [showAddMenu, setShowAddMenu] = useState(false);
   const [showAddItemForm, setShowAddItemForm] = useState(false);
@@ -45,13 +67,36 @@ export function InventoryPage() {
   const [qrContainer, setQrContainer] = useState<ListContainersResponse | null>(null);
   const [showScanner, setShowScanner] = useState(false);
 
-  const visibleContainers = containers.filter(
-    (c) => (c.parentId ?? null) === currentContainerId
-  );
-  const visibleItems = items.filter(
-    (i) => (i.containerId ?? null) === currentContainerId
-  );
+  // When a type filter is active, show all items with that type regardless of container
+  const isTypeFilterActive = typeFilter !== null && typeFilter !== "";
+
   const breadcrumb = getAncestorPath(currentContainerId, containers);
+
+  const visibleContainers = useMemo(() => {
+    // Type filter: hide containers when browsing by type
+    if (isTypeFilterActive) return [];
+    let result = containers.filter((c) => (c.parentId ?? null) === currentContainerId);
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter((c) => c.name.toLowerCase().includes(q));
+    }
+    return result;
+  }, [containers, currentContainerId, searchQuery, isTypeFilterActive]);
+
+  const visibleItems = useMemo(() => {
+    let result: ListItemsResponse[];
+    if (isTypeFilterActive) {
+      // Show all items with the selected type across all containers
+      result = items.filter((i) => i.typeId === typeFilter);
+    } else {
+      result = items.filter((i) => (i.containerId ?? null) === currentContainerId);
+    }
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter((i) => i.name.toLowerCase().includes(q));
+    }
+    return result;
+  }, [items, currentContainerId, searchQuery, isTypeFilterActive, typeFilter]);
 
   const handleQRScan = (code: string) => {
     setShowScanner(false);
@@ -95,8 +140,15 @@ export function InventoryPage() {
     setEditingItem(null);
   };
 
+  const typeFilterOptions = [
+    { value: "", label: "All types" },
+    ...itemTypes.map((t) => ({ value: t.id, label: t.name })),
+  ];
+
+  const selectedTypeName = itemTypes.find((t) => t.id === typeFilter)?.name;
+
   return (
-    <div className={styles.page} onClick={() => setShowAddMenu(false)}>
+    <div style={{ paddingBottom: 80 }}>
       {(itemError || containerError) && (
         <ErrorBanner message={itemError ?? containerError ?? ""} />
       )}
@@ -105,32 +157,91 @@ export function InventoryPage() {
         <BarcodeScanner onDetected={handleQRScan} onCancel={() => setShowScanner(false)} />
       )}
 
-      {/* Breadcrumb */}
-      <nav className={styles.breadcrumb} aria-label="Current location">
-        <button
-          className={`${styles.breadcrumbItem} ${currentContainerId === null ? styles.breadcrumbCurrent : ""}`}
-          onClick={() => setCurrentContainerId(null)}
-        >
-          Home
-        </button>
-        {breadcrumb.map((ancestor) => (
-          <span key={ancestor.id} className={styles.breadcrumbGroup}>
-            <span className={styles.breadcrumbSep}>›</span>
-            <button
-              className={`${styles.breadcrumbItem} ${ancestor.id === currentContainerId ? styles.breadcrumbCurrent : ""}`}
+      {/* Search + Filter bar */}
+      <Stack gap="xs" px="md" pt="md" pb="xs">
+        <Group gap="xs">
+          <TextInput
+            placeholder="Search items & containers…"
+            leftSection={<IconSearch size={16} />}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{ flex: 1 }}
+            size="sm"
+          />
+          <ActionIcon
+            size={36}
+            variant="default"
+            onClick={() => setShowScanner(true)}
+            aria-label="Scan QR code"
+            title="Scan QR code"
+          >
+            <IconQrcode size={18} />
+          </ActionIcon>
+        </Group>
+
+        <Select
+          leftSection={<IconFilter size={14} />}
+          value={typeFilter ?? ""}
+          onChange={(v) => setTypeFilter(v || null)}
+          data={typeFilterOptions}
+          size="sm"
+          placeholder="Filter by type"
+        />
+      </Stack>
+
+      {/* Type filter banner */}
+      {isTypeFilterActive && (
+        <Paper mx="md" mb="xs" p="xs" withBorder bg="violet.0">
+          <Group gap="xs">
+            <IconPackage size={14} />
+            <Text size="xs">
+              Showing all items of type:
+            </Text>
+            <Badge size="sm" color="violet">{selectedTypeName}</Badge>
+            <Anchor
+              size="xs"
+              onClick={() => setTypeFilter(null)}
+              style={{ marginLeft: "auto" }}
+            >
+              Clear
+            </Anchor>
+          </Group>
+        </Paper>
+      )}
+
+      {/* Breadcrumb — hidden when type filter is active */}
+      {!isTypeFilterActive && (
+        <Breadcrumbs px="md" pb="xs" separator="›" style={{ flexWrap: "wrap" }}>
+          <Anchor
+            size="sm"
+            onClick={() => setCurrentContainerId(null)}
+            fw={currentContainerId === null ? 600 : undefined}
+            c={currentContainerId === null ? "blue" : "dimmed"}
+          >
+            Home
+          </Anchor>
+          {breadcrumb.map((ancestor) => (
+            <Anchor
+              key={ancestor.id}
+              size="sm"
               onClick={() => setCurrentContainerId(ancestor.id)}
+              fw={ancestor.id === currentContainerId ? 600 : undefined}
+              c={ancestor.id === currentContainerId ? "blue" : "dimmed"}
             >
               {ancestor.name}
-            </button>
-          </span>
-        ))}
-      </nav>
+            </Anchor>
+          ))}
+        </Breadcrumbs>
+      )}
 
       <InventoryList
         containers={visibleContainers}
         items={visibleItems}
         itemTypes={itemTypes}
-        onEnterContainer={(id) => setCurrentContainerId(id)}
+        onEnterContainer={(id) => {
+          setTypeFilter(null);
+          setCurrentContainerId(id);
+        }}
         onEditContainer={(c) => setEditingContainer(c)}
         onDeleteContainer={(id) => setDeletingContainerId(id)}
         onShowQR={(c) => setQrContainer(c)}
@@ -138,41 +249,38 @@ export function InventoryPage() {
         onDeleteItem={(id) => setDeletingItemId(id)}
       />
 
-      {/* Scan FAB */}
-      <button
-        className={styles.scanFab}
-        onClick={(e) => { e.stopPropagation(); setShowScanner(true); }}
-        aria-label="Scan container QR code"
-        title="Scan QR code"
-      >
-        ▦
-      </button>
-
-      {/* Add FAB with submenu */}
-      <div className={styles.fabGroup} onClick={(e) => e.stopPropagation()}>
-        {showAddMenu && (
-          <div className={styles.addMenu}>
-            <button
-              className={styles.addMenuBtn}
+      {/* Add FAB */}
+      <div style={{ position: "fixed", bottom: 76, right: 16 }}>
+        <Menu
+          opened={showAddMenu}
+          onClose={() => setShowAddMenu(false)}
+          position="top-end"
+        >
+          <Menu.Target>
+            <ActionIcon
+              size={56}
+              radius="xl"
+              onClick={(e) => { e.stopPropagation(); setShowAddMenu((v) => !v); }}
+              aria-label="Add item or container"
+            >
+              <IconPlus size={24} />
+            </ActionIcon>
+          </Menu.Target>
+          <Menu.Dropdown>
+            <Menu.Item
+              leftSection={<IconFolder size={16} />}
               onClick={() => { setShowAddMenu(false); setShowAddContainerForm(true); }}
             >
-              🗂️ Container
-            </button>
-            <button
-              className={styles.addMenuBtn}
+              Container
+            </Menu.Item>
+            <Menu.Item
+              leftSection={<IconPackage size={16} />}
               onClick={() => { setShowAddMenu(false); setShowAddItemForm(true); }}
             >
-              📦 Item
-            </button>
-          </div>
-        )}
-        <button
-          className={styles.fab}
-          onClick={() => setShowAddMenu((v) => !v)}
-          aria-label="Add item or container"
-        >
-          +
-        </button>
+              Item
+            </Menu.Item>
+          </Menu.Dropdown>
+        </Menu>
       </div>
 
       {/* QR display */}
@@ -274,7 +382,6 @@ export function InventoryPage() {
           message="Delete this container?"
           onConfirm={async () => {
             await deleteContainer(deletingContainerId);
-            // If we deleted the container we're currently in, go up
             if (deletingContainerId === currentContainerId) setCurrentContainerId(null);
             setDeletingContainerId(null);
           }}

@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { ActionIcon } from "@mantine/core";
+import { IconPlus } from "@tabler/icons-react";
 import { ListItemTypesResponse } from "@inventory/core";
 import { useRepositories } from "../../context/RepositoryContext";
 import { useItemTypes } from "../../hooks/useItemTypes";
@@ -7,7 +9,6 @@ import { ItemTypeForm } from "./ItemTypeForm";
 import { Modal } from "../ui/Modal";
 import { ConfirmDialog } from "../ui/ConfirmDialog";
 import { ErrorBanner } from "../ui/ErrorBanner";
-import styles from "./ItemTypesPage.module.css";
 
 export function ItemTypesPage() {
   const { itemTypeRepo, refreshKey } = useRepositories();
@@ -18,7 +19,7 @@ export function ItemTypesPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   return (
-    <div className={styles.page}>
+    <div style={{ paddingBottom: 80 }}>
       {error && <ErrorBanner message={error} />}
       <ItemTypeList
         itemTypes={itemTypes}
@@ -26,9 +27,15 @@ export function ItemTypesPage() {
         onDelete={(id) => setDeletingId(id)}
       />
 
-      <button className={styles.fab} onClick={() => setShowForm(true)} aria-label="Add item type">
-        +
-      </button>
+      <ActionIcon
+        style={{ position: "fixed", bottom: 76, right: 16 }}
+        size={56}
+        radius="xl"
+        onClick={() => setShowForm(true)}
+        aria-label="Add item type"
+      >
+        <IconPlus size={24} />
+      </ActionIcon>
 
       {showForm && (
         <Modal title="Add Item Type" onClose={() => setShowForm(false)}>

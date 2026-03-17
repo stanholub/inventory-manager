@@ -1,6 +1,6 @@
 import { useState } from "react";
+import { TextInput, Select, Button, Group, Stack } from "@mantine/core";
 import { ListContainersResponse } from "@inventory/core";
-import styles from "./ContainerForm.module.css";
 
 interface ContainerFormProps {
   initial?: {
@@ -32,62 +32,48 @@ export function ContainerForm({ initial, availableParents, currentId, onSubmit, 
   };
 
   const parents = (availableParents ?? []).filter((c) => c.id !== currentId);
+  const parentOptions = [
+    { value: "", label: "— None (top-level) —" },
+    ...parents.map((c) => ({ value: c.id, label: c.name })),
+  ];
 
   return (
-    <form onSubmit={handleSubmit} className={styles.form}>
-      <div className={styles.field}>
-        <label className={styles.label}>Name</label>
-        <input
-          className={styles.input}
+    <form onSubmit={handleSubmit}>
+      <Stack gap="sm">
+        <TextInput
+          label="Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
           autoFocus
         />
-      </div>
-      <div className={styles.field}>
-        <label className={styles.label}>Description</label>
-        <input
-          className={styles.input}
+        <TextInput
+          label="Description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Optional"
         />
-      </div>
-      <div className={styles.field}>
-        <label className={styles.label}>Type</label>
-        <input
-          className={styles.input}
+        <TextInput
+          label="Type"
           value={type}
           onChange={(e) => setType(e.target.value)}
           placeholder="Optional"
         />
-      </div>
-      {parents.length > 0 && (
-        <div className={styles.field}>
-          <label className={styles.label}>Parent container</label>
-          <select
-            className={styles.input}
+        {parents.length > 0 && (
+          <Select
+            label="Parent container"
             value={parentId}
-            onChange={(e) => setParentId(e.target.value)}
-          >
-            <option value="">— None (top-level) —</option>
-            {parents.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
-      <div className={styles.actions}>
-        <button type="button" className={styles.cancelBtn} onClick={onCancel}>
-          Cancel
-        </button>
-        <button type="submit" className={styles.submitBtn}>
-          Save
-        </button>
-      </div>
+            onChange={(v) => setParentId(v ?? "")}
+            data={parentOptions}
+          />
+        )}
+        <Group justify="flex-end" mt="sm">
+          <Button variant="default" onClick={onCancel}>
+            Cancel
+          </Button>
+          <Button type="submit">Save</Button>
+        </Group>
+      </Stack>
     </form>
   );
 }

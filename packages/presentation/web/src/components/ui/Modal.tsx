@@ -1,5 +1,5 @@
-import { ReactNode, useEffect } from "react";
-import styles from "./Modal.module.css";
+import { ReactNode } from "react";
+import { Modal as MantineModal } from "@mantine/core";
 
 interface ModalProps {
   title: string;
@@ -8,25 +8,15 @@ interface ModalProps {
 }
 
 export function Modal({ title, onClose, children }: ModalProps) {
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
-  }, [onClose]);
-
   return (
-    <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-        <div className={styles.header}>
-          <h2 className={styles.title}>{title}</h2>
-          <button className={styles.close} onClick={onClose} aria-label="Close">
-            ✕
-          </button>
-        </div>
-        <div className={styles.body}>{children}</div>
-      </div>
-    </div>
+    <MantineModal
+      opened
+      onClose={onClose}
+      title={title}
+      centered
+      size="md"
+    >
+      {children}
+    </MantineModal>
   );
 }
