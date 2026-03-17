@@ -45,11 +45,16 @@ create table if not exists containers (
   name        text        not null,
   description text,
   type        text,
+  parent_id   text        references containers(id) on delete set null,
   updated_at  timestamptz not null default now(),
   device_id   text,
   deleted_at  timestamptz,
   created_at  timestamptz not null default now()
 );
+
+-- Migration: add parent_id to an existing containers table
+-- Run this if you already applied the original schema:
+-- alter table containers add column if not exists parent_id text references containers(id) on delete set null;
 
 create table if not exists item_types (
   id          text        primary key,

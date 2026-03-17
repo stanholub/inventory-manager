@@ -27,15 +27,15 @@ export function useContainers(containerRepo: ContainerRepository, refreshKey?: n
   }, [containerRepo]);
 
   const addContainer = useCallback(
-    async (name: string, description?: string, type?: string) => {
-      await new AddContainer(containerRepo).execute({ name, description, type });
+    async (name: string, description?: string, type?: string, parentId?: string) => {
+      await new AddContainer(containerRepo).execute({ name, description, type, parentId });
       await refresh();
     },
     [containerRepo, refresh]
   );
 
   const updateContainer = useCallback(
-    async (id: string, fields: { name?: string; description?: string | null; type?: string | null }) => {
+    async (id: string, fields: { name?: string; description?: string | null; type?: string | null; parentId?: string | null }) => {
       await new UpdateContainer(containerRepo).execute({ id, ...fields });
       await refresh();
     },

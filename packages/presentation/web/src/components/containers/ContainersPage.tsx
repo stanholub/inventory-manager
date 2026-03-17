@@ -73,8 +73,9 @@ export function ContainersPage({ onNavigateToContainer }: ContainersPageProps) {
       {showForm && (
         <Modal title="Add Container" onClose={() => setShowForm(false)}>
           <ContainerForm
+            availableParents={containers}
             onSubmit={async (data) => {
-              await addContainer(data.name, data.description, data.type);
+              await addContainer(data.name, data.description, data.type, data.parentId);
               setShowForm(false);
             }}
             onCancel={() => setShowForm(false)}
@@ -85,13 +86,21 @@ export function ContainersPage({ onNavigateToContainer }: ContainersPageProps) {
       {editing && (
         <Modal title="Edit Container" onClose={() => setEditing(null)}>
           <ContainerForm
+            currentId={editing.id}
+            availableParents={containers}
             initial={{
               name: editing.name,
               description: editing.description,
               type: editing.type,
+              parentId: editing.parentId,
             }}
             onSubmit={async (data) => {
-              await updateContainer(editing.id, data);
+              await updateContainer(editing.id, {
+                name: data.name,
+                description: data.description ?? null,
+                type: data.type ?? null,
+                parentId: data.parentId ?? null,
+              });
               setEditing(null);
             }}
             onCancel={() => setEditing(null)}

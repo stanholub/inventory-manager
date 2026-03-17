@@ -6,7 +6,8 @@ export class Container {
     public type?: string,
     public updatedAt: string = new Date().toISOString(),
     public deviceId?: string,
-    public deletedAt?: string
+    public deletedAt?: string,
+    public parentId?: string
   ) {}
 
   touch(deviceId: string) {

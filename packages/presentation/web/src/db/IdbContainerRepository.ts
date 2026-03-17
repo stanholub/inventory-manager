@@ -19,6 +19,7 @@ export class IdbContainerRepository implements ContainerRepository {
       updatedAt: container.updatedAt ?? FALLBACK_TS,
       deviceId: container.deviceId,
       deletedAt: container.deletedAt,
+      parentId: container.parentId,
     });
     return container;
   }
@@ -39,7 +40,8 @@ export class IdbContainerRepository implements ContainerRepository {
       rec.type,
       rec.updatedAt ?? FALLBACK_TS,
       rec.deviceId,
-      rec.deletedAt
+      rec.deletedAt,
+      rec.parentId
     );
   }
 
@@ -57,7 +59,8 @@ export class IdbContainerRepository implements ContainerRepository {
             r.type,
             r.updatedAt ?? FALLBACK_TS,
             r.deviceId,
-            r.deletedAt
+            r.deletedAt,
+            r.parentId
           )
       );
   }

@@ -21,7 +21,8 @@ export class ContainerController {
   async addContainer(
     name: string,
     description?: string,
-    type?: string
+    type?: string,
+    parentId?: string
   ): Promise<AddContainerResponse> {
     if (!name?.trim()) {
       throw new Error("Container name cannot be empty");
@@ -37,6 +38,7 @@ export class ContainerController {
       name: name.trim(),
       description,
       type,
+      parentId,
     });
   }
 
@@ -46,7 +48,7 @@ export class ContainerController {
 
   async updateContainer(
     id: string,
-    fields: { name?: string; description?: string | null; type?: string | null }
+    fields: { name?: string; description?: string | null; type?: string | null; parentId?: string | null }
   ): Promise<UpdateContainerResponse> {
     if (!id?.trim()) {
       throw new Error("Container ID cannot be empty");

@@ -3,10 +3,12 @@ import { useRepositories } from "../../context/RepositoryContext";
 import { SyncConfig, validateSupabaseUrl } from "../../sync/SyncConfig";
 import { getSupabaseClient } from "../../sync/SupabaseClient";
 import { getLastSyncedAt } from "../../sync/SyncConfig";
+import { useInstallPrompt } from "../../hooks/useInstallPrompt";
 import styles from "./SettingsPage.module.css";
 
 export function SettingsPage() {
   const { syncConfig, setSyncConfig, syncStatus, pendingOps, failedOps, syncService } = useRepositories();
+  const { canInstall, isInstalled, triggerInstall } = useInstallPrompt();
 
   const [url, setUrl] = useState(syncConfig?.supabaseUrl ?? "");
   const [key, setKey] = useState(syncConfig?.supabaseAnonKey ?? "");
@@ -87,6 +89,28 @@ export function SettingsPage() {
 
   return (
     <div className={styles.page}>
+      {(canInstall || isInstalled) && (
+        <section className={styles.section}>
+          <h2 className={styles.sectionTitle}>Install App</h2>
+          {isInstalled ? (
+            <p className={styles.description}>
+              ✓ Inventory Manager is installed on this device and works offline.
+            </p>
+          ) : (
+            <>
+              <p className={styles.description}>
+                Install this app on your device for quick access and full offline use — no app store needed.
+              </p>
+              <div className={styles.actions}>
+                <button className={styles.btnPrimary} onClick={triggerInstall}>
+                  Install app
+                </button>
+              </div>
+            </>
+          )}
+        </section>
+      )}
+
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>Cloud Sync</h2>
         <p className={styles.description}>
