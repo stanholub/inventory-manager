@@ -18,11 +18,11 @@ export function ContainerList({ containers, onEdit, onDelete }: ContainerListPro
         <li key={container.id} className={styles.card}>
           <div className={styles.info}>
             <span className={styles.name}>{container.name}</span>
-            {(container as any).description && (
-              <span className={styles.meta}>{(container as any).description}</span>
+            {container.description && (
+              <span className={styles.meta}>{container.description}</span>
             )}
-            {(container as any).type && (
-              <span className={styles.meta}>Type: {(container as any).type}</span>
+            {container.type && (
+              <span className={styles.meta}>Type: {container.type}</span>
             )}
           </div>
           <div className={styles.actions}>

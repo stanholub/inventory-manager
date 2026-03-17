@@ -2,7 +2,7 @@
   "name": "inventory-manager",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "type": "module",
   "scripts": {
     "build": "pnpm -r build",
     "dev": "pnpm -r dev",
@@ -10,13 +10,26 @@
     "dev:web": "pnpm --filter @inventory/web dev",
     "build:web": "pnpm --filter @inventory/web build",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "prepare": "husky"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "packageManager": "pnpm@10.4.1",
+  "lint-staged": {
+    "*.{ts,tsx}": "eslint --fix"
+  },
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.57.1",
+    "@typescript-eslint/parser": "^8.57.1",
+    "eslint": "^10.0.3",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
     "tsup": "^8.5.0",
     "typescript": "^5.9.2",
     "vitest": "^3.0.0"

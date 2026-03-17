@@ -5,6 +5,8 @@ import { ContainerRepository } from "../interfaces/ContainerRepository";
 export interface ListContainersResponse {
   id: string;
   name: string;
+  description?: string;
+  type?: string;
 }
 
 export class ListContainers implements IUseCase<void, ListContainersResponse[]> {
@@ -16,6 +18,8 @@ export class ListContainers implements IUseCase<void, ListContainersResponse[]> 
     return containers.map((container) => ({
       id: container.id,
       name: container.name,
+      description: container.description,
+      type: container.type,
     }));
   }
 }

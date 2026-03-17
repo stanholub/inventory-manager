@@ -47,8 +47,8 @@ export function ContainersPage() {
           <ContainerForm
             initial={{
               name: editing.name,
-              description: (editing as any).description,
-              type: (editing as any).type,
+              description: editing.description,
+              type: editing.type,
             }}
             onSubmit={async (data) => {
               await updateContainer(editing.id, data);
