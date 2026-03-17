@@ -37,6 +37,7 @@ interface InventoryDB extends DBSchema {
       updatedAt: string;
       deviceId?: string;
       deletedAt?: string;
+      parentId?: string;
     };
   };
   itemTypes: {
@@ -61,7 +62,7 @@ let dbPromise: Promise<IDBPDatabase<InventoryDB>> | null = null;
 
 export function getDb(): Promise<IDBPDatabase<InventoryDB>> {
   if (!dbPromise) {
-    dbPromise = openDB<InventoryDB>("inventory-db", 2, {
+    dbPromise = openDB<InventoryDB>("inventory-db", 3, {
       upgrade(db, oldVersion) {
         if (oldVersion < 1) {
           db.createObjectStore("items", { keyPath: "id" });
@@ -76,6 +77,9 @@ export function getDb(): Promise<IDBPDatabase<InventoryDB>> {
             autoIncrement: true,
           });
         }
+        // v2→v3: parentId added to containers (existing records default to undefined)
+        // No schema change needed — IDB object stores are schema-less; the new
+        // field is simply absent on existing records and treated as undefined.
       },
     });
   }

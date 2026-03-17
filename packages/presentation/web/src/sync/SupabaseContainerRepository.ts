@@ -9,6 +9,7 @@ export interface RemoteContainerRow {
   updated_at: string;
   device_id: string | null;
   deleted_at: string | null;
+  parent_id: string | null;
 }
 
 export class SupabaseContainerRepository {
@@ -23,6 +24,7 @@ export class SupabaseContainerRepository {
       updated_at: container.updatedAt,
       device_id: container.deviceId ?? null,
       deleted_at: container.deletedAt ?? null,
+      parent_id: container.parentId ?? null,
     });
     if (error) throw new Error(`Supabase upsert containers: ${error.message}`);
   }
@@ -57,7 +59,8 @@ export class SupabaseContainerRepository {
       row.type ?? undefined,
       row.updated_at,
       row.device_id ?? undefined,
-      row.deleted_at ?? undefined
+      row.deleted_at ?? undefined,
+      row.parent_id ?? undefined
     );
   }
 }

@@ -7,6 +7,7 @@ export interface ListContainersResponse {
   name: string;
   description?: string;
   type?: string;
+  parentId?: string;
 }
 
 export class ListContainers implements IUseCase<void, ListContainersResponse[]> {
@@ -20,6 +21,7 @@ export class ListContainers implements IUseCase<void, ListContainersResponse[]> 
       name: container.name,
       description: container.description,
       type: container.type,
+      parentId: container.parentId,
     }));
   }
 }
