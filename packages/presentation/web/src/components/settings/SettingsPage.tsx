@@ -2,6 +2,7 @@ import { useState } from "react";
 import {
   Stack,
   TextInput,
+  NumberInput,
   PasswordInput,
   Button,
   Group,
@@ -47,6 +48,23 @@ export function SettingsPage() {
   const [authTab, setAuthTab] = useState<string>("signin");
 
   const lastSyncedAt = getLastSyncedAt();
+
+  const [lowStockThreshold, setLowStockThreshold] = useState<number | string>(
+    () => {
+      const raw = localStorage.getItem("inventory.lowStockThreshold");
+      if (raw === null) return 2;
+      const parsed = parseInt(raw, 10);
+      return isNaN(parsed) ? 2 : parsed;
+    }
+  );
+
+  const handleLowStockThresholdChange = (value: number | string) => {
+    setLowStockThreshold(value);
+    const num = typeof value === "number" ? value : parseInt(String(value), 10);
+    if (!isNaN(num) && num >= 0) {
+      localStorage.setItem("inventory.lowStockThreshold", String(num));
+    }
+  };
 
   const handleTest = async () => {
     setTestState("testing");
@@ -146,6 +164,20 @@ export function SettingsPage() {
           )}
         </Paper>
       )}
+
+      {/* Inventory preferences */}
+      <Paper p="md" withBorder>
+        <Title order={5} mb="sm">Inventory Preferences</Title>
+        <NumberInput
+          label="Low stock threshold"
+          description="Items at or below this quantity will be highlighted in orange. Set to 0 to disable."
+          value={lowStockThreshold}
+          onChange={handleLowStockThresholdChange}
+          min={0}
+          max={9999}
+          step={1}
+        />
+      </Paper>
 
       {/* Cloud Sync */}
       <Paper p="md" withBorder>

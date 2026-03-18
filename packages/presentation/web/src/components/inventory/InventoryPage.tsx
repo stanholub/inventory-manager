@@ -19,6 +19,7 @@ import {
   IconFilter,
   IconFolder,
   IconPackage,
+  IconSortAscending,
 } from "@tabler/icons-react";
 import { ListContainersResponse, ListItemsResponse } from "@inventory/core";
 import { useRepositories } from "../../context/RepositoryContext";
@@ -34,6 +35,17 @@ import { ErrorBanner } from "../ui/ErrorBanner";
 import { QRCodeDisplay } from "../ui/QRCodeDisplay";
 import { BarcodeScanner } from "../ui/BarcodeScanner";
 
+type SortOption = "default" | "name-asc" | "name-desc" | "qty-asc" | "qty-desc";
+
+const LOW_STOCK_THRESHOLD_KEY = "inventory.lowStockThreshold";
+
+function getLowStockThreshold(): number {
+  const raw = localStorage.getItem(LOW_STOCK_THRESHOLD_KEY);
+  if (raw === null) return 2;
+  const parsed = parseInt(raw, 10);
+  return isNaN(parsed) ? 2 : parsed;
+}
+
 function getAncestorPath(
   containerId: string | null,
   containers: ListContainersResponse[]
@@ -47,15 +59,31 @@ function getAncestorPath(
   return path;
 }
 
+function sortContainers(list: ListContainersResponse[], sort: SortOption): ListContainersResponse[] {
+  if (sort === "name-asc") return [...list].sort((a, b) => a.name.localeCompare(b.name));
+  if (sort === "name-desc") return [...list].sort((a, b) => b.name.localeCompare(a.name));
+  return list;
+}
+
+function sortItems(list: ListItemsResponse[], sort: SortOption): ListItemsResponse[] {
+  if (sort === "name-asc") return [...list].sort((a, b) => a.name.localeCompare(b.name));
+  if (sort === "name-desc") return [...list].sort((a, b) => b.name.localeCompare(a.name));
+  if (sort === "qty-asc") return [...list].sort((a, b) => a.quantity - b.quantity);
+  if (sort === "qty-desc") return [...list].sort((a, b) => b.quantity - a.quantity);
+  return list;
+}
+
 export function InventoryPage() {
   const { itemRepo, containerRepo, itemTypeRepo, refreshKey } = useRepositories();
-  const { items, error: itemError, addItem, updateItem, deleteItem } = useItems(itemRepo, refreshKey);
+  const { items, error: itemError, addItem, updateItem, updateItemQty, deleteItem } = useItems(itemRepo, refreshKey);
   const { containers, error: containerError, addContainer, updateContainer, deleteContainer } = useContainers(containerRepo, refreshKey);
   const { itemTypes } = useItemTypes(itemTypeRepo, refreshKey);
 
   const [currentContainerId, setCurrentContainerId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<SortOption>("default");
+  const [inlineQtyError, setInlineQtyError] = useState<string | null>(null);
 
   const [showAddMenu, setShowAddMenu] = useState(false);
   const [showAddItemForm, setShowAddItemForm] = useState(false);
@@ -66,6 +94,8 @@ export function InventoryPage() {
   const [deletingContainerId, setDeletingContainerId] = useState<string | null>(null);
   const [qrContainer, setQrContainer] = useState<ListContainersResponse | null>(null);
   const [showScanner, setShowScanner] = useState(false);
+
+  const lowStockThreshold = getLowStockThreshold();
 
   // When a type filter is active, show all items with that type regardless of container
   const isTypeFilterActive = typeFilter !== null && typeFilter !== "";
@@ -80,8 +110,8 @@ export function InventoryPage() {
       const q = searchQuery.toLowerCase();
       result = result.filter((c) => c.name.toLowerCase().includes(q));
     }
-    return result;
-  }, [containers, currentContainerId, searchQuery, isTypeFilterActive]);
+    return sortContainers(result, sortBy);
+  }, [containers, currentContainerId, searchQuery, isTypeFilterActive, sortBy]);
 
   const visibleItems = useMemo(() => {
     let result: ListItemsResponse[];
@@ -95,13 +125,23 @@ export function InventoryPage() {
       const q = searchQuery.toLowerCase();
       result = result.filter((i) => i.name.toLowerCase().includes(q));
     }
-    return result;
-  }, [items, currentContainerId, searchQuery, isTypeFilterActive, typeFilter]);
+    return sortItems(result, sortBy);
+  }, [items, currentContainerId, searchQuery, isTypeFilterActive, typeFilter, sortBy]);
 
   const handleQRScan = (code: string) => {
     setShowScanner(false);
     const match = containers.find((c) => c.id === code);
     if (match) setCurrentContainerId(match.id);
+  };
+
+  const handleInlineQtyUpdate = async (id: string, qty: number) => {
+    try {
+      setInlineQtyError(null);
+      await updateItemQty(id, qty);
+    } catch (e) {
+      setInlineQtyError(String(e));
+      setTimeout(() => setInlineQtyError(null), 3000);
+    }
   };
 
   const handleAddItem = async (data: {
@@ -145,12 +185,20 @@ export function InventoryPage() {
     ...itemTypes.map((t) => ({ value: t.id, label: t.name })),
   ];
 
+  const sortOptions = [
+    { value: "default", label: "Default order" },
+    { value: "name-asc", label: "Name A → Z" },
+    { value: "name-desc", label: "Name Z → A" },
+    { value: "qty-asc", label: "Quantity ↑" },
+    { value: "qty-desc", label: "Quantity ↓" },
+  ];
+
   const selectedTypeName = itemTypes.find((t) => t.id === typeFilter)?.name;
 
   return (
     <div style={{ paddingBottom: 80 }}>
-      {(itemError || containerError) && (
-        <ErrorBanner message={itemError ?? containerError ?? ""} />
+      {(itemError || containerError || inlineQtyError) && (
+        <ErrorBanner message={inlineQtyError ?? itemError ?? containerError ?? ""} />
       )}
 
       {showScanner && (
@@ -179,14 +227,25 @@ export function InventoryPage() {
           </ActionIcon>
         </Group>
 
-        <Select
-          leftSection={<IconFilter size={14} />}
-          value={typeFilter ?? ""}
-          onChange={(v) => setTypeFilter(v || null)}
-          data={typeFilterOptions}
-          size="sm"
-          placeholder="Filter by type"
-        />
+        <Group gap="xs">
+          <Select
+            leftSection={<IconFilter size={14} />}
+            value={typeFilter ?? ""}
+            onChange={(v) => setTypeFilter(v || null)}
+            data={typeFilterOptions}
+            size="sm"
+            style={{ flex: 1 }}
+            placeholder="Filter by type"
+          />
+          <Select
+            leftSection={<IconSortAscending size={14} />}
+            value={sortBy}
+            onChange={(v) => setSortBy((v as SortOption) ?? "default")}
+            data={sortOptions}
+            size="sm"
+            style={{ flex: 1 }}
+          />
+        </Group>
       </Stack>
 
       {/* Type filter banner */}
@@ -238,6 +297,9 @@ export function InventoryPage() {
         containers={visibleContainers}
         items={visibleItems}
         itemTypes={itemTypes}
+        allItems={items}
+        allContainers={containers}
+        lowStockThreshold={lowStockThreshold}
         onEnterContainer={(id) => {
           setTypeFilter(null);
           setCurrentContainerId(id);
@@ -247,6 +309,7 @@ export function InventoryPage() {
         onShowQR={(c) => setQrContainer(c)}
         onEditItem={(i) => setEditingItem(i)}
         onDeleteItem={(id) => setDeletingItemId(id)}
+        onUpdateItemQty={handleInlineQtyUpdate}
       />
 
       {/* Add FAB */}
