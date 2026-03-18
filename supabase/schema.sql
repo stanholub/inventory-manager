@@ -18,6 +18,7 @@
 --   updated_at   – ISO timestamp of last write; used for last-write-wins merge
 --   device_id    – UUID of the device that wrote this row (for attribution)
 --   deleted_at   – tombstone timestamp; NULL means the record is active
+--   user_id      – Supabase auth UID; NULL means unauthenticated / legacy row
 --
 -- JSON columns:
 --   items.field_values   – arbitrary key/value pairs matching the item's type
@@ -37,6 +38,7 @@ create table if not exists items (
   updated_at  timestamptz not null default now(),
   device_id   text,
   deleted_at  timestamptz,
+  user_id     uuid        references auth.users(id) on delete cascade,
   created_at  timestamptz not null default now()
 );
 
@@ -49,6 +51,7 @@ create table if not exists containers (
   updated_at  timestamptz not null default now(),
   device_id   text,
   deleted_at  timestamptz,
+  user_id     uuid        references auth.users(id) on delete cascade,
   created_at  timestamptz not null default now()
 );
 
@@ -64,6 +67,7 @@ create table if not exists item_types (
   updated_at  timestamptz not null default now(),
   device_id   text,
   deleted_at  timestamptz,
+  user_id     uuid        references auth.users(id) on delete cascade,
   created_at  timestamptz not null default now()
 );
 
@@ -72,22 +76,56 @@ create index if not exists items_updated_at_idx      on items      (updated_at);
 create index if not exists containers_updated_at_idx on containers (updated_at);
 create index if not exists item_types_updated_at_idx on item_types (updated_at);
 
--- ── Optional: Row Level Security ────────────────────────────────────────────
--- If you plan to share this Supabase project with others in the future, or
--- want to add user-based auth later, uncomment and adapt the lines below.
--- By default, the publishable key has full read/write access (appropriate for a
--- single-user personal inventory).
+-- Indexes for user_id filtering
+create index if not exists items_user_id_idx      on items      (user_id);
+create index if not exists containers_user_id_idx on containers (user_id);
+create index if not exists item_types_user_id_idx on item_types (user_id);
 
--- alter table items      enable row level security;
--- alter table containers enable row level security;
--- alter table item_types enable row level security;
+-- ── Migration: add user_id to existing tables ─────────────────────────────
+-- Run this if you already applied the original schema without user_id:
+-- alter table items      add column if not exists user_id uuid references auth.users(id) on delete cascade;
+-- alter table containers add column if not exists user_id uuid references auth.users(id) on delete cascade;
+-- alter table item_types add column if not exists user_id uuid references auth.users(id) on delete cascade;
 
--- Example open policy (publishable key full access – current default behaviour):
--- create policy "publishable full access" on items      for all using (true) with check (true);
--- create policy "publishable full access" on containers for all using (true) with check (true);
--- create policy "publishable full access" on item_types for all using (true) with check (true);
+-- ── Row Level Security (multi-user) ──────────────────────────────────────────
+-- Enable RLS on all tables to isolate data per user.
+-- Unauthenticated access (user_id IS NULL) falls back to device-based access
+-- using the publishable key with the open policy below.
+--
+-- OPTION A – Single user / personal use (default):
+--   Uncomment the "open policy" lines for full read/write with the publishable key.
+--
+-- OPTION B – Multi-user (recommended when sharing a Supabase project):
+--   Enable RLS and the user-scoped policies so each authenticated user sees only
+--   their own data. Rows with user_id IS NULL are only accessible unauthenticated.
 
--- Example user-scoped policy (enable after adding auth):
--- create policy "user owns rows" on items
---   for all using (auth.uid()::text = device_id)
---   with check (auth.uid()::text = device_id);
+alter table items      enable row level security;
+alter table containers enable row level security;
+alter table item_types enable row level security;
+
+-- ── Authenticated users see and manage only their own rows ────────────────────
+create policy "user owns items" on items
+  for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+create policy "user owns containers" on containers
+  for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+create policy "user owns item_types" on item_types
+  for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+-- ── Unauthenticated / legacy access (single-user without auth) ────────────────
+-- Uncomment and use INSTEAD OF the user-scoped policies above if you want
+-- single-user personal use without authentication:
+--
+-- create policy "publishable full access" on items
+--   for all using (true) with check (true);
+-- create policy "publishable full access" on containers
+--   for all using (true) with check (true);
+-- create policy "publishable full access" on item_types
+--   for all using (true) with check (true);

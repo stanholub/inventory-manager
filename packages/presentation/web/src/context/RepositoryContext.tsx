@@ -12,6 +12,7 @@ import { SyncQueue } from "../sync/SyncQueue";
 import { SyncConfig, getSyncConfig } from "../sync/SyncConfig";
 import { SyncService, SyncStatus } from "../sync/SyncService";
 import { useSyncService } from "../sync/useSyncService";
+import { AuthProvider } from "./AuthContext";
 
 interface RepositoryContextValue {
   itemRepo: ItemRepository;
@@ -107,7 +108,9 @@ export function RepositoryProvider({ children }: { children: ReactNode }) {
 
   return (
     <RepositoryContext.Provider value={value}>
-      {children}
+      <AuthProvider syncConfig={syncConfig}>
+        {children}
+      </AuthProvider>
     </RepositoryContext.Provider>
   );
 }

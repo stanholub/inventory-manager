@@ -1,9 +1,10 @@
-import styles from "./ErrorBanner.module.css";
+import { Alert } from "@mantine/core";
+import { IconAlertCircle } from "@tabler/icons-react";
 
 export function ErrorBanner({ message }: { message: string }) {
   return (
-    <div className={styles.banner} role="alert">
+    <Alert icon={<IconAlertCircle size={16} />} color="red" mb="sm">
       {message}
-    </div>
+    </Alert>
   );
 }
