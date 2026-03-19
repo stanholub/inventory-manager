@@ -15,6 +15,19 @@ interface ContainersPageProps {
   onNavigateToContainer?: (containerId: string) => void;
 }
 
+function getDescendantIds(containers: ListContainersResponse[], id: string): Set<string> {
+  const result = new Set<string>();
+  const queue = [id];
+  while (queue.length > 0) {
+    const current = queue.shift()!;
+    result.add(current);
+    for (const c of containers) {
+      if (c.parentId === current) queue.push(c.id);
+    }
+  }
+  return result;
+}
+
 export function ContainersPage({ onNavigateToContainer }: ContainersPageProps) {
   const { containerRepo, refreshKey } = useRepositories();
   const { containers, error, addContainer, updateContainer, deleteContainer } = useContainers(containerRepo, refreshKey);
@@ -87,7 +100,7 @@ export function ContainersPage({ onNavigateToContainer }: ContainersPageProps) {
         <Modal title="Edit Container" onClose={() => setEditing(null)}>
           <ContainerForm
             currentId={editing.id}
-            availableParents={containers}
+            availableParents={containers.filter((c) => !getDescendantIds(containers, editing.id).has(c.id))}
             initial={{
               name: editing.name,
               description: editing.description,

@@ -16,6 +16,7 @@ import {
   List,
   Code,
   Tabs,
+  ThemeIcon,
 } from "@mantine/core";
 import {
   IconAlertCircle,
@@ -24,6 +25,9 @@ import {
   IconLogout,
   IconLogin,
   IconUserPlus,
+  IconX,
+  IconCopy,
+  IconRefresh,
 } from "@tabler/icons-react";
 import { useRepositories } from "../../context/RepositoryContext";
 import { useAuth } from "../../context/AuthContext";
@@ -31,6 +35,7 @@ import { SyncConfig, validateSupabaseUrl } from "../../sync/SyncConfig";
 import { getSupabaseClient } from "../../sync/SupabaseClient";
 import { getLastSyncedAt } from "../../sync/SyncConfig";
 import { useInstallPrompt } from "../../hooks/useInstallPrompt";
+import { SCHEMA_SQL, checkSchema, SchemaStatus } from "../../sync/schema";
 
 export function SettingsPage() {
   const { syncConfig, setSyncConfig, syncStatus, pendingOps, failedOps, syncService } = useRepositories();
@@ -46,6 +51,10 @@ export function SettingsPage() {
   const [authEmail, setAuthEmail] = useState("");
   const [authPassword, setAuthPassword] = useState("");
   const [authTab, setAuthTab] = useState<string>("signin");
+
+  const [schemaStatus, setSchemaStatus] = useState<SchemaStatus | null>(null);
+  const [schemaChecking, setSchemaChecking] = useState(false);
+  const [schemaCopied, setSchemaCopied] = useState(false);
 
   const lastSyncedAt = getLastSyncedAt();
 
@@ -64,6 +73,21 @@ export function SettingsPage() {
     if (!isNaN(num) && num >= 0) {
       localStorage.setItem("inventory.lowStockThreshold", String(num));
     }
+  };
+
+  const handleCheckSchema = async () => {
+    if (!syncConfig) return;
+    setSchemaChecking(true);
+    const client = getSupabaseClient(syncConfig);
+    const status = await checkSchema(client);
+    setSchemaStatus(status);
+    setSchemaChecking(false);
+  };
+
+  const handleCopySchema = async () => {
+    await navigator.clipboard.writeText(SCHEMA_SQL);
+    setSchemaCopied(true);
+    setTimeout(() => setSchemaCopied(false), 2000);
   };
 
   const handleTest = async () => {
@@ -358,6 +382,63 @@ export function SettingsPage() {
               </Tabs>
             </Stack>
           )}
+        </Paper>
+      )}
+
+      {/* Database Schema */}
+      {syncConfig && (
+        <Paper p="md" withBorder>
+          <Title order={5} mb="xs">Database Schema</Title>
+          <Text size="sm" c="dimmed" mb="md">
+            Check whether the required tables exist in your Supabase project, or copy the
+            schema SQL to apply it in the{" "}
+            <Anchor
+              href={`${syncConfig.supabaseUrl.replace(/\/$/, "")}/project/default/sql`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              SQL Editor
+            </Anchor>
+            .
+          </Text>
+
+          {schemaStatus && (
+            <Stack gap="xs" mb="md">
+              {(
+                [
+                  ["items", "items", schemaStatus.items],
+                  ["containers", "containers", schemaStatus.containers],
+                  ["item_types", "item_types", schemaStatus.itemTypes],
+                  ["containers.parent_id", "containers (parent_id column)", schemaStatus.containersParentId],
+                ] as [string, string, boolean | null][]
+              ).map(([, label, ok]) => (
+                <Group key={label} gap="xs">
+                  <ThemeIcon size="xs" color={ok ? "green" : "red"} variant="light">
+                    {ok ? <IconCheck size={10} /> : <IconX size={10} />}
+                  </ThemeIcon>
+                  <Text size="sm">{label}</Text>
+                </Group>
+              ))}
+            </Stack>
+          )}
+
+          <Group>
+            <Button
+              variant="default"
+              leftSection={<IconRefresh size={16} />}
+              loading={schemaChecking}
+              onClick={handleCheckSchema}
+            >
+              Check tables
+            </Button>
+            <Button
+              variant="default"
+              leftSection={schemaCopied ? <IconCheck size={16} /> : <IconCopy size={16} />}
+              onClick={handleCopySchema}
+            >
+              {schemaCopied ? "Copied!" : "Copy schema SQL"}
+            </Button>
+          </Group>
         </Paper>
       )}
 
